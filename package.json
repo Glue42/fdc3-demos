@@ -1,0 +1,12 @@
+{
+  "name": "fdc3-demos",
+  "version": "0.0.1",
+  "devDependencies": {
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.10"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}

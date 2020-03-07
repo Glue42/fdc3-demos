@@ -1,0 +1,123 @@
+<html>
+    <head>
+        <style>
+            body {
+                background: #111;
+            }
+
+        </style>
+        <title>TradingView Chart</title>
+        <link rel="shortcut icon" href="https://fdc3.finos.org/img/favicon/favicon.ico">
+        <link rel="manifest" href="/manifests/tradingview-chart.json">
+        <script>
+            navigator.serviceWorker.register('sw.js', {
+                scope: './'
+            });
+        </script>
+    </head>
+
+<body>
+
+<!-- TradingView Widget BEGIN -->
+<div class="tradingview-widget-container">
+  <div id="tradingview_76bcd"></div>
+
+
+</div>
+
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script>
+    const target = "tradingview_76bcd";
+    const time = 1000;
+    let chart = null;
+    let context = "AAPL";
+    function createChart(symbol){
+        //clear the dom
+        document.getElementById(target).innerHTML = "";
+
+    chart =  new TradingView.widget(
+        {
+        "width": window.innerWidth-20,
+        "height": window.innerHeight-50,
+        "symbol": symbol,
+        "interval": "D",
+        "timezone": "Etc/UTC",
+        "theme": "Dark",
+        "style": "1",
+        "locale": "en",
+        "toolbar_bg": "#f1f3f6",
+        "enable_publishing": false,
+        "allow_symbol_change": true,
+        "container_id":target
+        });
+
+        document.title = `TradingView Chart - ${symbol}`;
+    }
+
+
+
+    function watchContext(){
+    if (chart &&  chart.getSymbolInfo && chart._ready){
+
+    try{
+            chart.getSymbolInfo(s=> {
+            // console.log("got symbol info");
+                let sym = null;
+                if (s && s.name){
+                    sym = s.name;
+                    if (sym && sym !== context){
+                        console.log("new symbol " + sym);
+                        document.title = `TradingView Chart - ${sym}`;
+                        context = sym;
+                        fdc3.broadcast({type:"fdc3.instrument",name:s.description,id:{ticker:sym}});
+                    }
+                }   
+
+            });
+        } catch(e){
+            console.log("error getting symbol info " + e);
+
+        }
+    }
+    }
+
+    createChart(context);
+
+    function handleContext(ctx){
+    if (ctx.id && ctx.id.ticker){
+        if (context !== ctx.id.ticker){
+            context = ctx.id.ticker;
+            createChart(ctx.id.ticker);
+        }
+    }
+    //handle FactSet context
+    else if (ctx.id && ctx.id.FDS_ID){
+        if (context !== ctx.id.FDS_ID){
+            context = ctx.id.FDS_ID;
+            createChart(ctx.id.FDS_ID);
+        }
+    }
+    }
+
+    window.onresize = function(){
+    createChart(context);
+    };
+
+
+    const onFDC3 = () => {
+    if (!window._fdc3handlersSet && window.fdc3){
+        fdc3.addContextListener(handleContext);
+        fdc3.addIntentListener("fdc3.ViewChart",handleContext);
+        window._fdc3handlersSet = true;
+    }
+    };
+
+
+    window.addEventListener("DOMContentLoaded",function(){
+    onFDC3();
+    window.setInterval(watchContext,1000);	       
+    });
+
+</script>
+</body>
+</html>
