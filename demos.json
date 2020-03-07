@@ -1,6 +1,8 @@
 [
     {
-        "name":"tradingview-chart"
+        "name":"tradingview-chart",
+        "title":"FDC3 TradingView Chart",
+        "cacheList":"'/scripts/util.js'"
 
     },
     {

@@ -8,12 +8,13 @@
         </style>
         <title>TradingView Chart</title>
         <link rel="shortcut icon" href="https://fdc3.finos.org/img/favicon/favicon.ico">
-        <link rel="manifest" href="/manifests/tradingview-chart.json">
+        <link rel="manifest" href="/manifests/web/tradingview-chart">
         <script>
-            navigator.serviceWorker.register('sw.js', {
+            navigator.serviceWorker.register('/tradingview-chart/sw.js', {
                 scope: './'
             });
         </script>
+        <script src="/scripts/util.js"></script>
     </head>
 
 <body>
@@ -104,18 +105,18 @@
     };
 
 
-    const onFDC3 = () => {
-    if (!window._fdc3handlersSet && window.fdc3){
-        fdc3.addContextListener(handleContext);
-        fdc3.addIntentListener("fdc3.ViewChart",handleContext);
-        window._fdc3handlersSet = true;
-    }
-    };
+    fdc3Init(() =>{
+        if (!window._fdc3handlersSet && window.fdc3){
+            fdc3.addContextListener(handleContext);
+            fdc3.addIntentListener("fdc3.ViewChart",handleContext);
+
+        }
+    });
 
 
     window.addEventListener("DOMContentLoaded",function(){
-    onFDC3();
-    window.setInterval(watchContext,1000);	       
+ 
+        window.setInterval(watchContext,1000);	       
     });
 
 </script>

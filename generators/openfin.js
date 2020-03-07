@@ -19,7 +19,7 @@ const generate = (data, request) => {
 
     startup_app.name = data.name;
     startup_app.uuid = data.name;
-    startup_app.url = `${request.protocol}://${subdomains}${fullhost}/${data.name}.html`;
+    startup_app.url = `${request.protocol}://${subdomains}${fullhost}/${data.name}`;
     startup_app.autoShow = true;
     startup_app.saveWindowState = true;
     startup_app.frame = true;
