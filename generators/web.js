@@ -9,15 +9,15 @@
     "theme_color":"#222",
     "icons": [
         {
-        "src": "https://appd.kolbito.com/images/fdc3-icon-192.png",
-        "sizes": "192x192",
-        "type": "image/png"
+            "src": "https://appd.kolbito.com/images/fdc3-icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
         },
         {
             "src": "https://appd.kolbito.com/images/fdc3-icon-512.png",
             "sizes": "512x512",
             "type": "image/png"
-            }
+        }
     ]
 }*/
 
@@ -25,10 +25,10 @@ const config = require('../config');
 
 /**
   * generate the web app manifest from metadata in the demos.json datastructure
-  * @param {*} data  
-  * @param {*} request 
+  * @param {*} data
+  * @param {*} request
   */
- const generate = (data, request) => {
+const generate = (data, request) => {
     const result = {};
     const fullhost = request.hostname === "localhost" ? request.hostname + ":" + config.port : request.hostname;
     let subdomains = "";
@@ -42,17 +42,13 @@ const config = require('../config');
     result.name = data.title ? data.title : data.name;
     result.start_url = `${request.protocol}://${subdomains}${fullhost}/${data.name}`;
     result.short_name = data.name;
-    result.display ="standalone";
+    result.display = "standalone";
     result.scope = "/";
     result.icons = [];
-   
-
 
     return result;
 };
 
-
-
 module.exports = {
     generate
-}
+};

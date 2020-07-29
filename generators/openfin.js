@@ -1,10 +1,10 @@
 const config = require('../config');
 
- /**
-  * generate the openfin manifest from metadata in the demos.json datastructure
-  * @param {*} data  
-  * @param {*} request 
-  */
+/**
+ * generate the openfin manifest from metadata in the demos.json datastructure
+ * @param {*} data
+ * @param {*} request
+ */
 const generate = (data, request) => {
     const result = {};
     const startup_app = {};
@@ -23,18 +23,17 @@ const generate = (data, request) => {
     startup_app.autoShow = true;
     startup_app.saveWindowState = true;
     startup_app.frame = true;
-  
+
     startup_app.preloadScripts = [
         {
             "url": "https://cdn.openfin.co/services/openfin/fdc3/0.2.0/openfin-fdc3.js"
         }
     ];
-   
-   
+
     result.startup_app = startup_app;
 
     result.runtime = {
-        "version":"stable"
+        "version": "stable"
     };
     result.services = [
         {
@@ -46,8 +45,6 @@ const generate = (data, request) => {
     return result;
 };
 
-
-
 module.exports = {
     generate
-}
+};

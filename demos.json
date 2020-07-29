@@ -1,11 +1,12 @@
 [
     {
-        "name":"tradingview-chart",
-        "title":"FDC3 TradingView Chart",
-        "cacheList":"'/scripts/util.js'"
-
+        "name": "tradingview-chart",
+        "title": "FDC3 TradingView Chart",
+        "cacheList": "'/scripts/util.js'"
     },
     {
-        "name":"tradingview-blotter"
+        "name": "tradingview-blotter",
+        "title": "FDC3 TradingView Blotter",
+        "cacheList": "'/scripts/util.js'"
     }
 ]

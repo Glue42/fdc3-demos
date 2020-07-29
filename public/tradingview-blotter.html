@@ -1,124 +1,112 @@
 <html>
-    <head>
-        <title>TradingView Blotter Demo</title>
-        <link rel="shortcut icon" href="https://www.tradingview.com/static/images/favicon.ico">
-<style>
-    body {
-        background: #222;
-        margin:0px;
-    }
-    #blotter-container {
-        display: flex;
-        flex-flow: wrap;
-        margin:3px;
-    }
-    
-    #blotter-container .tradingview-widget-container {
-        padding:3px;
-    }
 
-</style>
-    </head>
-    <body>
-        <!-- TradingView Widget BEGIN -->
-<div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
-        {
-        "symbols": [
-          {
-            "proName": "OANDA:SPX500USD",
-            "title": "S&P 500"
-          },
-          {
-            "proName": "OANDA:NAS100USD",
-            "title": "Nasdaq 100"
-          },
-          {
-            "proName": "FX_IDC:EURUSD",
-            "title": "EUR/USD"
-          },
-          {
-            "proName": "BITSTAMP:BTCUSD",
-            "title": "BTC/USD"
-          },
-          {
-            "proName": "BITSTAMP:ETHUSD",
-            "title": "ETH/USD"
-          }
-        ],
-        "colorTheme": "dark",
-        "isTransparent": false,
-        "displayMode": "adaptive",
-        "locale": "en"
-      }
-        </script>
-      </div>
-      <!-- TradingView Widget END -->
+<head>
+    <title>TradingView Blotter</title>
+    <link rel="shortcut icon" href="https://www.tradingview.com/static/images/favicon.ico">
+    <style>
+        body {
+            background: #222;
+            margin: 0px;
+        }
 
+        #blotter-container {
+            display: flex;
+            flex-flow: wrap;
+            margin: 3px;
+        }
 
-            <div id="blotter-container"></div>
-
-    </body>
+        #blotter-container .tradingview-widget-container {
+            padding: 3px;
+        }
+    </style>
+    <script src="/scripts/util.js"></script>
+    <!-- TODO (optional): Reference the manifest you want to use here: -->
+    <!-- e.g. <link rel="manifest" href="./manifests/web/tradingview-blotter"> -->
     <script>
-        
+        // TODO (optional): Register the service worker you want to use here:
+        // e.g.
+        // if ("serviceWorker" in navigator) {
+        //     navigator.serviceWorker.register('./tradingview-blotter/sw.js');
+        // }
+    </script>
+    <!-- TODO (optional): Reference your FDC3 implementation here. Skip this if your implementation is auto injected by the container or by a browser extension. -->
 
-        const makeTicker = (context) => {
-            let wrapper = document.createElement("div");
-            let ticker = context.id.ticker;
-            wrapper.className = "tradingview-widget-container";
+    <!-- TODO (optional): Reference any other scripts/styles you might need here (e.g. for a channel selector widget). -->
+
+</head>
+
+<body>
+    <!-- TODO (optional): Add a HTML element that would hold the channel selector widget.  -->
+    <!-- e.g. <select id="channel-selector-widget"></select> -->
+
+    <!-- TradingView Widget BEGIN -->
+    <div class="tradingview-widget-container">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js"
+            async>
+                {
+                    "symbols": [
+                        {
+                            "proName": "OANDA:SPX500USD",
+                            "title": "S&P 500"
+                        },
+                        {
+                            "proName": "OANDA:NAS100USD",
+                            "title": "Nasdaq 100"
+                        },
+                        {
+                            "proName": "FX_IDC:EURUSD",
+                            "title": "EUR/USD"
+                        },
+                        {
+                            "proName": "BITSTAMP:BTCUSD",
+                            "title": "BTC/USD"
+                        },
+                        {
+                            "proName": "BITSTAMP:ETHUSD",
+                            "title": "ETH/USD"
+                        }
+                    ],
+                        "colorTheme": "dark",
+                            "isTransparent": false,
+                                "displayMode": "adaptive",
+                                    "locale": "en"
+                }
+            </script>
+    </div>
+    <!-- TradingView Widget END -->
+
+    <div id="blotter-container"></div>
+</body>
+<script>
+    const makeTicker = (context) => {
+        const wrapper = document.createElement("div");
+        const ticker = context.id.ticker;
+        wrapper.className = "tradingview-widget-container";
         wrapper.innerHTML = `<div class="tradingview-widget-container__widget"></div></div>`;
-document.getElementById("blotter-container").appendChild(wrapper);
-let script = document.createElement("script");
-script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
-script.innerHTML = `  {
+        document.getElementById("blotter-container").appendChild(wrapper);
+        const script = document.createElement("script");
+        script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
+        script.innerHTML = `{
   "symbol": "${ticker}",
   "width": 350,
   "colorTheme": "dark",
   "isTransparent": false,
   "locale": "en"
 }`;
-let target = wrapper.querySelector(".tradingview-widget-container__widget");
-target.appendChild(script);
-        };
+        const target = wrapper.querySelector(".tradingview-widget-container__widget");
+        target.appendChild(script);
+    };
 
-
-function fdc3Init(callback){
-  let fdc3Tries = 10; //lets not check forever...
-  const onFDC3Ready = () => {
-    if (window.fdc3) {
-        callback.call(this);
-    }
-    else {
-      if (fdc3Tries > 0){
-        fdc3Tries--;
-        window.setTimeout(onFDC3Ready,100);
-      }
-    }
-  };
-  onFDC3Ready();
-}
-
-  
-document.addEventListener("DOMContentLoaded",() => {
-  fdc3Init(function(){
-    fdc3.addContextListener(ctx => {
-            if (ctx.type = "instrument" && ctx.id.ticker){
-                makeTicker(ctx);
-            }
-        });
-  });
-});
-    
-  /*const onFDC3 = () => {
-    if (!window._fdc3handlersSet && window.fdc3){
+    document.addEventListener("DOMContentLoaded", () => {
+        fdc3Init(() => {
             fdc3.addContextListener(ctx => {
-            if (ctx.type = "instrument" && ctx.id.ticker){
-                makeTicker(ctx);
-            }
+                if (ctx.type === "fdc3.instrument" && typeof ctx.id.ticker !== "undefined") {
+                    makeTicker(ctx);
+                }
+            });
         });
-        window._fdc3handlersSet = true; 
-    }
-};*/
-    </script>
+    });
+</script>
+
 </html>

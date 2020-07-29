@@ -1,0 +1,56 @@
+<html>
+
+<head>
+    <link rel="shortcut icon" href="https://www.tradingview.com/static/images/favicon.ico">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>FDC3 TradingView Chart and Blotter</title>
+    <style>
+        html {
+            height: 100%;
+        }
+
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        iframe {
+            flex-grow: 1;
+        }
+
+        .container {
+            display: flex;
+            height: 100%;
+        }
+
+        .item {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            height: 100%;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="item">
+            <button onclick="window.open('./tradingview-chart.html')"><i class="fa fa-arrows"></i>Open
+                in New Tab</button>
+            <button onclick="window.open('./tradingview-chart.html', '_blank', 'height=800,width=600')"><i
+                    class="fa fa-external-link"></i>Open
+                in New Window</button>
+            <iframe src="./tradingview-chart.html"></iframe>
+        </div>
+        <div class="item">
+            <button onclick="window.open('./tradingview-blotter.html')"><i class="fa fa-arrows"></i>Open in
+                New Tab</button>
+            <button onclick="window.open('./tradingview-blotter.html', '_blank', 'height=800,width=600')"><i
+                    class="fa fa-external-link"></i>Open in New Window</button>
+            <iframe src="./tradingview-blotter.html"></iframe>
+        </div>
+    </div>
+</body>
+
+</html>
