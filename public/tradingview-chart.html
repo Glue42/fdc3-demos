@@ -11,22 +11,31 @@
     <script src="/scripts/util.js"></script>
     <!-- TODO (optional): Reference the manifest you want to use here: -->
     <!-- e.g. <link rel="manifest" href="./manifests/web/tradingview-chart"> -->
+    <link rel="manifest" href="./manifest-chart.json">
     <script>
         // TODO (optional): Register the service worker you want to use here:
         // e.g.
         // if ("serviceWorker" in navigator) {
         //     navigator.serviceWorker.register('./tradingview-chart/sw.js');
         // }
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("./service-worker.js");
+        }
     </script>
     <!-- TODO (optional): Reference your FDC3 implementation here. Skip this if your implementation is auto injected by the container or by a browser extension. -->
+    <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
 
     <!-- TODO (optional): Reference any other scripts/styles you might need here (e.g. for a channel selector widget). -->
-
+    <link rel="stylesheet" href="./scripts/jquery-ui.min.css">
+    <script type="text/javascript" src="./scripts/jquery-1.12.4.min.js"></script>
+    <script src="./scripts/jquery-ui.min.js"></script>
+    <script src="./scripts/glue42-core-channel-selector.js"></script>
 </head>
 
 <body>
     <!-- TODO (optional): Add a HTML element that would hold the channel selector widget.  -->
     <!-- e.g. <select id="channel-selector-widget"></select> -->
+    <select id="channel-selector-widget"></select>
 
     <!-- TradingView Widget BEGIN -->
     <div class="tradingview-widget-container">

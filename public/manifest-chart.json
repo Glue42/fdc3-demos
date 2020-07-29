@@ -1,0 +1,22 @@
+{
+    "short_name": "TradingView Chart",
+    "name": "TradingView Chart Demo",
+    "icons": [
+        {
+            "src": "/assets/logo192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        },
+        {
+            "src": "/assets/logo512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "description": "TradingView Chart Demo FDC3 Standard over Glue42",
+    "start_url": "./tradingview-chart.html",
+    "scope": "/",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
+}

@@ -1,0 +1,98 @@
+{
+    "glue": {
+        "worker": "./worker.js",
+        "layouts": {
+            "autoRestore": false,
+            "autoSaveWindowContext": false
+        }
+    },
+    "gateway": {
+        "location": "./gateway.js"
+    },
+    "channels": [
+        {
+            "name": "Red",
+            "meta": {
+                "color": "red"
+            }
+        },
+        {
+            "name": "Green",
+            "meta": {
+                "color": "green"
+            }
+        },
+        {
+            "name": "Blue",
+            "meta": {
+                "color": "#66ABFF"
+            }
+        },
+        {
+            "name": "Pink",
+            "meta": {
+                "color": "#F328BB"
+            }
+        },
+        {
+            "name": "Yellow",
+            "meta": {
+                "color": "#FFE733"
+            }
+        },
+        {
+            "name": "Dark Yellow",
+            "meta": {
+                "color": "#b09b00"
+            }
+        },
+        {
+            "name": "Orange",
+            "meta": {
+                "color": "#fa5a28"
+            }
+        },
+        {
+            "name": "Purple",
+            "meta": {
+                "color": "#c873ff"
+            }
+        },
+        {
+            "name": "Lime",
+            "meta": {
+                "color": "#8af59e"
+            }
+        },
+        {
+            "name": "Cyan",
+            "meta": {
+                "color": "#80f3ff"
+            }
+        }
+    ],
+    "appManager": {
+        "localApplications": [
+            {
+                "name": "TradingView Blotter",
+                "appId": "tradingview-blotter",
+                "manifestType": "fdc3.glue42-core.demo",
+                "manifest": "{\"url\":\"http://localhost:9000/tradingview-blotter.html\"}"
+            },
+            {
+                "name": "TradingView Chart",
+                "appId": "tradingview-chart",
+                "manifestType": "fdc3.glue42-core.demo",
+                "manifest": "{\"url\":\"http://localhost:9000/tradingview-chart.html\"}",
+                "intents": [
+                    {
+                        "name": "fdc3.ViewChart",
+                        "contexts": [
+                            "fdc3.instrument"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
