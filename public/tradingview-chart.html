@@ -2,16 +2,80 @@
 
 <head>
     <title>TradingView Chart</title>
-    <link rel="shortcut icon" href="https://www.tradingview.com/static/images/favicon.ico">
+    <link rel="shortcut icon" href="https://www.tradingview.com/static/images/favicon.ico" />
     <style>
         body {
             background: #111;
+            margin: 0px;
+            height: 100vh;
+        }
+
+        section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            padding-left: 0.5rem;
+        }
+
+        .tradingview-widget-container {
+            flex-grow: 1;
+        }
+
+        span.ui-selectmenu-text {
+            display: initial;
+            margin-right: 0;
+            overflow: inherit;
+            text-overflow: ellipsis;
+        }
+
+        span.ui-selectmenu-icon {
+            display: none;
+        }
+
+        span.ui-state-hover,
+        span.ui-widget-content .ui-state-hover,
+        span.ui-widget-header .ui-state-hover,
+        span.ui-state-focus,
+        span.ui-widget-content .ui-state-focus,
+        span.ui-widget-header .ui-state-focus,
+        span.ui-button:hover,
+        span.ui-button:focus {
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            color: #ffffff;
+            outline: none;
+        }
+
+        ul.ui-widget-content {
+            min-width: 10rem;
+            padding: 0 0;
+            font-size: 0.875rem;
+            color: #bbbbbb;
+            background-color: rgba(45, 45, 45, 0.75);
+            background-clip: padding-box;
+            border-radius: 0;
+            backdrop-filter: blur(5px) saturate(200%);
+        }
+
+        ul.ui-widget.ui-widget-content {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        ul.ui-widget-content .ui-state-active,
+        ul.ui-widget-content .ui-button.ui-state-active:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: transparent;
         }
     </style>
     <script src="/scripts/util.js"></script>
     <!-- TODO (optional): Reference the manifest you want to use here: -->
     <!-- e.g. <link rel="manifest" href="./manifests/web/tradingview-chart"> -->
-    <link rel="manifest" href="./manifest-chart.json">
+    <link rel="manifest" href="./manifest-chart.json" />
     <script>
         // TODO (optional): Register the service worker you want to use here:
         // e.g.
@@ -24,24 +88,26 @@
     </script>
     <!-- TODO (optional): Reference your FDC3 implementation here. Skip this if your implementation is auto injected by the container or by a browser extension. -->
     <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
-
     <!-- TODO (optional): Reference any other scripts/styles you might need here (e.g. for a channel selector widget). -->
-    <link rel="stylesheet" href="./scripts/jquery-ui.min.css">
+    <link rel="stylesheet" href="./scripts/jquery-ui.min.css" />
     <script type="text/javascript" src="./scripts/jquery-1.12.4.min.js"></script>
     <script src="./scripts/jquery-ui.min.js"></script>
     <script src="./scripts/glue42-core-channel-selector.js"></script>
 </head>
 
 <body>
-    <!-- TODO (optional): Add a HTML element that would hold the channel selector widget.  -->
-    <!-- e.g. <select id="channel-selector-widget"></select> -->
-    <select id="channel-selector-widget"></select>
+    <section>
+        <!-- TODO (optional): Add a HTML element that would hold the channel selector widget.  -->
+        <!-- e.g. <select id="channel-selector-widget"></select> -->
+        <header>
+            <select id="channel-selector-widget"></select>
+        </header>
 
-    <!-- TradingView Widget BEGIN -->
-    <div class="tradingview-widget-container">
-        <div id="tradingview_76bcd"></div>
-    </div>
-
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container">
+            <div id="tradingview_76bcd"></div>
+        </div>
+    </section>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         const target = "tradingview_76bcd";
@@ -53,21 +119,20 @@
             //clear the dom
             document.getElementById(target).innerHTML = "";
 
-            chart = new TradingView.widget(
-                {
-                    width: window.innerWidth - 20,
-                    height: window.innerHeight - 50,
-                    symbol: symbol,
-                    interval: "D",
-                    timezone: "Etc/UTC",
-                    theme: "Dark",
-                    style: "1",
-                    locale: "en",
-                    toolbar_bg: "#f1f3f6",
-                    enable_publishing: false,
-                    allow_symbol_change: true,
-                    container_id: target
-                });
+            chart = new TradingView.widget({
+                width: window.innerWidth - 20,
+                height: window.innerHeight - 50,
+                symbol: symbol,
+                interval: "D",
+                timezone: "Etc/UTC",
+                theme: "Dark",
+                style: "1",
+                locale: "en",
+                toolbar_bg: "#f1f3f6",
+                enable_publishing: false,
+                allow_symbol_change: true,
+                container_id: target,
+            });
 
             document.title = `TradingView Chart - ${symbol}`;
         }
@@ -75,7 +140,7 @@
         function watchContext() {
             if (chart && chart.getSymbolInfo && chart._ready) {
                 try {
-                    chart.getSymbolInfo(s => {
+                    chart.getSymbolInfo((s) => {
                         let sym = null;
                         if (s && s.name) {
                             sym = s.name;
@@ -83,10 +148,13 @@
                                 console.log("new symbol " + sym);
                                 document.title = `TradingView Chart - ${sym}`;
                                 context = sym;
-                                fdc3.broadcast({ type: "fdc3.instrument", name: s.description, id: { ticker: sym } });
+                                fdc3.broadcast({
+                                    type: "fdc3.instrument",
+                                    name: s.description,
+                                    id: { ticker: sym },
+                                });
                             }
                         }
-
                     });
                 } catch (e) {
                     console.log("error getting symbol info " + e);

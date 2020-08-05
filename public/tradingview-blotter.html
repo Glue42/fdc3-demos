@@ -7,6 +7,19 @@
         body {
             background: #222;
             margin: 0px;
+            height: 100vh;
+        }
+
+        section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            padding-left: .5rem;
         }
 
         #blotter-container {
@@ -15,8 +28,58 @@
             margin: 3px;
         }
 
+        .tradingview-widget-container {
+            flex-grow: 1;
+        }
+
         #blotter-container .tradingview-widget-container {
             padding: 3px;
+        }
+
+        span.ui-selectmenu-text {
+            display: initial;
+            margin-right: 0;
+            overflow: inherit;
+            text-overflow: ellipsis;
+        }
+
+        span.ui-selectmenu-icon {
+            display: none;
+        }
+
+        span.ui-state-hover,
+        span.ui-widget-content .ui-state-hover,
+        span.ui-widget-header .ui-state-hover,
+        span.ui-state-focus,
+        span.ui-widget-content .ui-state-focus,
+        span.ui-widget-header .ui-state-focus,
+        span.ui-button:hover,
+        span.ui-button:focus {
+            border: 1px solid rgba(255, 255, 255, 0.3) !important;
+            color: #ffffff;
+            outline: none;
+        }
+
+        ul.ui-widget-content {
+            min-width: 10rem;
+            padding: 0 0;
+            font-size: 0.875rem;
+            color: #bbbbbb;
+            background-color: rgba(45, 45, 45, 0.75);
+            background-clip: padding-box;
+            border-radius: 0;
+            backdrop-filter: blur(5px) saturate(200%);
+        }
+
+        ul.ui-widget.ui-widget-content {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        ul.ui-widget-content .ui-state-active,
+        ul.ui-widget-content .ui-button.ui-state-active:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: transparent;
         }
     </style>
     <script src="/scripts/util.js"></script>
@@ -44,48 +107,52 @@
 </head>
 
 <body>
-    <!-- TODO (optional): Add a HTML element that would hold the channel selector widget.  -->
-    <!-- e.g. <select id="channel-selector-widget"></select> -->
-    <select id="channel-selector-widget"></select>
+    <section>
+        <!-- TODO (optional): Add a HTML element that would hold the channel selector widget.  -->
+        <!-- e.g. <select id="channel-selector-widget"></select> -->
+        <header>
+            <select id="channel-selector-widget"></select>
+        </header>
 
-    <!-- TradingView Widget BEGIN -->
-    <div class="tradingview-widget-container">
-        <div class="tradingview-widget-container__widget"></div>
-        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js"
-            async>
-                {
-                    "symbols": [
-                        {
-                            "proName": "OANDA:SPX500USD",
-                            "title": "S&P 500"
-                        },
-                        {
-                            "proName": "OANDA:NAS100USD",
-                            "title": "Nasdaq 100"
-                        },
-                        {
-                            "proName": "FX_IDC:EURUSD",
-                            "title": "EUR/USD"
-                        },
-                        {
-                            "proName": "BITSTAMP:BTCUSD",
-                            "title": "BTC/USD"
-                        },
-                        {
-                            "proName": "BITSTAMP:ETHUSD",
-                            "title": "ETH/USD"
-                        }
-                    ],
-                        "colorTheme": "dark",
-                            "isTransparent": false,
-                                "displayMode": "adaptive",
-                                    "locale": "en"
-                }
-            </script>
-    </div>
-    <!-- TradingView Widget END -->
+        <!-- TradingView Widget BEGIN -->
+        <div class="tradingview-widget-container">
+            <div class="tradingview-widget-container__widget"></div>
+            <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js"
+                async>
+                    {
+                        "symbols": [
+                            {
+                                "proName": "OANDA:SPX500USD",
+                                "title": "S&P 500"
+                            },
+                            {
+                                "proName": "OANDA:NAS100USD",
+                                "title": "Nasdaq 100"
+                            },
+                            {
+                                "proName": "FX_IDC:EURUSD",
+                                "title": "EUR/USD"
+                            },
+                            {
+                                "proName": "BITSTAMP:BTCUSD",
+                                "title": "BTC/USD"
+                            },
+                            {
+                                "proName": "BITSTAMP:ETHUSD",
+                                "title": "ETH/USD"
+                            }
+                        ],
+                            "colorTheme": "dark",
+                                "isTransparent": false,
+                                    "displayMode": "adaptive",
+                                        "locale": "en"
+                    }
+                </script>
+        </div>
+        <!-- TradingView Widget END -->
 
-    <div id="blotter-container"></div>
+        <div id="blotter-container"></div>
+    </section>
 </body>
 <script>
     const makeTicker = (context) => {

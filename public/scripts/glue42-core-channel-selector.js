@@ -14,7 +14,7 @@ window.createChannelSelectorWidget = (
         textAlign: "center"
       });
 
-      const color = item.element.attr("color") || "#f5f5f5";
+      const color = item.element.attr("color") || "transparent";
       const channelSelectorWidgetButtonElement = $("#channel-selector-widget-button");
       channelSelectorWidgetButtonElement.css('background-color', color);
 
@@ -26,8 +26,8 @@ window.createChannelSelectorWidget = (
       const wrapper = $("<div>", {
         text: item.value
       }).css({
-        padding: "2px 0 2px 48px",
-        lineHeight: "1.5"
+        paddingLeft: "32px",
+        lineHeight: "130%"
       });
       $("<span>", {
         class: "icon"
@@ -36,11 +36,12 @@ window.createChannelSelectorWidget = (
           backgroundColor: item.element.attr("color"),
           position: "absolute",
           bottom: 0,
-          left: "3px",
+          left: "7px",
           margin: "auto 0",
-          height: "24px",
-          width: "24px",
-          top: "1px"
+          height: "16px",
+          width: "16px",
+          top: "1px",
+      
         })
         .appendTo(wrapper);
 
@@ -56,9 +57,10 @@ window.createChannelSelectorWidget = (
   });
 
   $("#channel-selector-widget-button").css({
-    width: "148px",
-    height: "28px",
-    alignSelf: "center",
+    width: "2rem",
+    height: "1.5rem",
+    textAlign: "center",
+    borderColor: "transparent",
     padding: 0
   });
 
