@@ -1,0 +1,45 @@
+span.ui-selectmenu-text {
+    display: initial;
+    margin-right: 0;
+    overflow: inherit;
+    text-overflow: ellipsis;
+}
+
+span.ui-selectmenu-icon {
+    display: none;
+}
+
+span.ui-state-hover,
+span.ui-widget-content .ui-state-hover,
+span.ui-widget-header .ui-state-hover,
+span.ui-state-focus,
+span.ui-widget-content .ui-state-focus,
+span.ui-widget-header .ui-state-focus,
+span.ui-button:hover,
+span.ui-button:focus {
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #ffffff;
+    outline: none;
+}
+
+ul.ui-widget-content {
+  min-width: 10rem;
+  padding: 0 0;
+  font-size: 0.875rem;
+  color: #bbbbbb;
+  background-color: rgba(45, 45, 45, 0.75);
+  background-clip: padding-box;
+  border-radius: 0;
+  backdrop-filter: blur(5px) saturate(200%);
+}
+
+ul.ui-widget.ui-widget-content {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+ul.ui-widget-content .ui-state-active,
+ul.ui-widget-content .ui-button.ui-state-active:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: transparent;
+}

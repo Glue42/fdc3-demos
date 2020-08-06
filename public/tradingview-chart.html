@@ -25,52 +25,6 @@
         .tradingview-widget-container {
             flex-grow: 1;
         }
-
-        span.ui-selectmenu-text {
-            display: initial;
-            margin-right: 0;
-            overflow: inherit;
-            text-overflow: ellipsis;
-        }
-
-        span.ui-selectmenu-icon {
-            display: none;
-        }
-
-        span.ui-state-hover,
-        span.ui-widget-content .ui-state-hover,
-        span.ui-widget-header .ui-state-hover,
-        span.ui-state-focus,
-        span.ui-widget-content .ui-state-focus,
-        span.ui-widget-header .ui-state-focus,
-        span.ui-button:hover,
-        span.ui-button:focus {
-            border: 1px solid rgba(255, 255, 255, 0.3) !important;
-            color: #ffffff;
-            outline: none;
-        }
-
-        ul.ui-widget-content {
-            min-width: 10rem;
-            padding: 0 0;
-            font-size: 0.875rem;
-            color: #bbbbbb;
-            background-color: rgba(45, 45, 45, 0.75);
-            background-clip: padding-box;
-            border-radius: 0;
-            backdrop-filter: blur(5px) saturate(200%);
-        }
-
-        ul.ui-widget.ui-widget-content {
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        ul.ui-widget-content .ui-state-active,
-        ul.ui-widget-content .ui-button.ui-state-active:hover {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.05);
-            border-color: transparent;
-        }
     </style>
     <script src="/scripts/util.js"></script>
     <!-- TODO (optional): Reference the manifest you want to use here: -->
@@ -89,7 +43,8 @@
     <!-- TODO (optional): Reference your FDC3 implementation here. Skip this if your implementation is auto injected by the container or by a browser extension. -->
     <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
     <!-- TODO (optional): Reference any other scripts/styles you might need here (e.g. for a channel selector widget). -->
-    <link rel="stylesheet" href="./scripts/jquery-ui.min.css" />
+    <link rel="stylesheet" href="./styles/glue42-core-channel-selector.css">
+    <link rel="stylesheet" href="./styles/jquery-ui.min.css" />
     <script type="text/javascript" src="./scripts/jquery-1.12.4.min.js"></script>
     <script src="./scripts/jquery-ui.min.js"></script>
     <script src="./scripts/glue42-core-channel-selector.js"></script>
