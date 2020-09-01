@@ -9,14 +9,20 @@ window.createChannelSelectorWidget = (
     _renderButtonItem: item => {
       const buttonItem = $("<span>", {
         class: "ui-selectmenu-text",
-        html: "🔗"
+        html: `
+        <svg viewBox="0 0 16 16" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.715 6.542L3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.001 1.001 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z" />
+          <path d="M5.712 6.96l.167-.167a1.99 1.99 0 0 1 .896-.518 1.99 1.99 0 0 1 .518-.896l.167-.167A3.004 3.004 0 0 0 6 5.499c-.22.46-.316.963-.288 1.46z" />
+          <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 0 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 0 0-4.243-4.243L6.586 4.672z" />
+          <path d="M10 9.5a2.99 2.99 0 0 0 .288-1.46l-.167.167a1.99 1.99 0 0 1-.896.518 1.99 1.99 0 0 1-.518.896l-.167.167A3.004 3.004 0 0 0 10 9.501z" />
+        </svg>`
       }).css({
         textAlign: "center"
       });
 
       const color = item.element.attr("color") || "transparent";
       const channelSelectorWidgetButtonElement = $("#channel-selector-widget-button");
-      channelSelectorWidgetButtonElement.css('background-color', color);
+      channelSelectorWidgetButtonElement.css("background-color", color);
 
       return buttonItem;
     },
@@ -41,7 +47,7 @@ window.createChannelSelectorWidget = (
           height: "16px",
           width: "16px",
           top: "1px",
-      
+
         })
         .appendTo(wrapper);
 
@@ -58,7 +64,6 @@ window.createChannelSelectorWidget = (
 
   $("#channel-selector-widget-button").css({
     width: "2rem",
-    height: "1.5rem",
     textAlign: "center",
     borderColor: "transparent",
     padding: 0
@@ -86,32 +91,33 @@ window.createChannelSelectorWidget = (
   // Return a method that would allow the update of the channel programmatically.
   return (channelName) => {
     channelSelectorWidgetElement.val(channelName);
-    channelSelectorWidgetElement.channelSelectorWidget('refresh', true);
+    channelSelectorWidgetElement.channelSelectorWidget("refresh", true);
   };
 };
 
 window.gluePromise.then(async () => {
   // The value that will be displayed inside the channel selector widget to leave the current channel.
-  const NO_CHANNEL_VALUE = 'No channel';
+  const NO_CHANNEL_VALUE = "No channel";
 
   // Get the channel names and colors using the Channels API.
-  const channelContexts = await window.glue.channels.list();
-  const channelNamesAndColors = channelContexts.sort((channelContextA, channelContextB) => channelContextA.name.localeCompare(channelContextB.name)).map(channelContext => ({
-    name: channelContext.name,
-    color: channelContext.meta.color
+  const channelContexts = await window.fdc3.getSystemChannels();
+  const channelNamesAndColors = channelContexts.sort((channelContextA, channelContextB) => channelContextA.id.localeCompare(channelContextB.id)).map(channelContext => ({
+    name: channelContext.id,
+    color: channelContext.displayMetadata.color
   }));
 
-  const onChannelSelected = (channelName) => {
+  const onChannelSelected = async (channelName) => {
     if (channelName === NO_CHANNEL_VALUE) {
-      if (window.glue.channels.my()) {
-        window.glue.channels.leave().catch(console.error);
+      const currentChannel = await window.fdc3.getCurrentChannel()
+      if (typeof currentChannel !== "undefined") {
+        window.fdc3.leaveCurrentChannel().catch(console.error);
       }
     } else {
-      window.glue.channels.join(channelName).catch(console.error);
+      window.fdc3.joinChannel(channelName).catch(console.error);
     }
   };
 
-  const rerenderChannels = createChannelSelectorWidget(
+  const rerenderChannels = window.createChannelSelectorWidget(
     NO_CHANNEL_VALUE,
     channelNamesAndColors,
     onChannelSelected
