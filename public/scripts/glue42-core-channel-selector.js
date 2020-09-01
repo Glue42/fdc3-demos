@@ -100,23 +100,24 @@ window.gluePromise.then(async () => {
   const NO_CHANNEL_VALUE = "No channel";
 
   // Get the channel names and colors using the Channels API.
-  const channelContexts = await window.glue.channels.list();
-  const channelNamesAndColors = channelContexts.sort((channelContextA, channelContextB) => channelContextA.name.localeCompare(channelContextB.name)).map(channelContext => ({
-    name: channelContext.name,
-    color: channelContext.meta.color
+  const channelContexts = await window.fdc3.getSystemChannels();
+  const channelNamesAndColors = channelContexts.sort((channelContextA, channelContextB) => channelContextA.id.localeCompare(channelContextB.id)).map(channelContext => ({
+    name: channelContext.id,
+    color: channelContext.displayMetadata.color
   }));
 
-  const onChannelSelected = (channelName) => {
+  const onChannelSelected = async (channelName) => {
     if (channelName === NO_CHANNEL_VALUE) {
-      if (window.glue.channels.my()) {
-        window.glue.channels.leave().catch(console.error);
+      const currentChannel = await window.fdc3.getCurrentChannel()
+      if (typeof currentChannel !== "undefined") {
+        window.fdc3.leaveCurrentChannel().catch(console.error);
       }
     } else {
-      window.glue.channels.join(channelName).catch(console.error);
+      window.fdc3.joinChannel(channelName).catch(console.error);
     }
   };
 
-  const rerenderChannels = createChannelSelectorWidget(
+  const rerenderChannels = window.createChannelSelectorWidget(
     NO_CHANNEL_VALUE,
     channelNamesAndColors,
     onChannelSelected

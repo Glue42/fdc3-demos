@@ -72,26 +72,10 @@
         }
     ],
     "appManager": {
-        "localApplications": [
+        "remoteSources": [
             {
-                "name": "TradingView Blotter",
-                "appId": "tradingview-blotter",
-                "manifestType": "fdc3.glue42-core.demo",
-                "manifest": "{\"url\":\"http://localhost:9000/tradingview-blotter.html\"}"
-            },
-            {
-                "name": "TradingView Chart",
-                "appId": "tradingview-chart",
-                "manifestType": "fdc3.glue42-core.demo",
-                "manifest": "{\"url\":\"http://localhost:9000/tradingview-chart.html\"}",
-                "intents": [
-                    {
-                        "name": "fdc3.ViewChart",
-                        "contexts": [
-                            "fdc3.instrument"
-                        ]
-                    }
-                ]
+                "url": "http://localhost:3002/v1/apps/search",
+                "pollingInterval": 1000
             }
         ]
     }

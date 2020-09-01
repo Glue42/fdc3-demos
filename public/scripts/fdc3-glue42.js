@@ -16792,7 +16792,7 @@
         }
     }
 
-    var version$3 = "1.2.2";
+    var version$3 = "1.3.2";
 
     function createCommonjsModule$2(fn, basedir, module) {
     	return module = {
@@ -17233,6 +17233,18 @@
                 });
             });
         };
+        RemoteWebWindow.prototype.focus = function () {
+            return __awaiter$2(this, void 0, void 0, function () {
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, this.callControl("focus", {}, true)];
+                        case 1:
+                            _a.sent();
+                            return [2, this];
+                    }
+                });
+            });
+        };
         RemoteWebWindow.prototype.getBounds = function () {
             return __awaiter$2(this, void 0, void 0, function () {
                 var result;
@@ -17323,13 +17335,33 @@
         }
         var _userErrorHandler = options && typeof options.errorHandling === "function" && options.errorHandling;
         var callbacks = {};
-        function add(key, callback) {
+        function add(key, callback, replayArgumentsArr) {
             var callbacksForKey = callbacks[key];
             if (!callbacksForKey) {
                 callbacksForKey = [];
                 callbacks[key] = callbacksForKey;
             }
             callbacksForKey.push(callback);
+            if (replayArgumentsArr) {
+                setTimeout(function () {
+                    replayArgumentsArr.forEach(function (replayArgument) {
+                        var _a;
+                        if ((_a = callbacks[key]) === null || _a === void 0 ? void 0 : _a.includes(callback)) {
+                            try {
+                                if (Array.isArray(replayArgument)) {
+                                    callback.apply(undefined, replayArgument);
+                                }
+                                else {
+                                    callback.apply(undefined, [replayArgument]);
+                                }
+                            }
+                            catch (err) {
+                                _handleError(err, key);
+                            }
+                        }
+                    });
+                }, 0);
+            }
             return function () {
                 var allForKey = callbacks[key];
                 if (!allForKey) {
@@ -17570,6 +17602,14 @@
                 });
             });
         };
+        LocalWebWindow.prototype.focus = function () {
+            return __awaiter$2(this, void 0, void 0, function () {
+                return __generator$2(this, function (_a) {
+                    window.focus();
+                    return [2, this];
+                });
+            });
+        };
         LocalWebWindow.prototype.getBounds = function () {
             return __awaiter$2(this, void 0, void 0, function () {
                 return __generator$2(this, function (_a) {
@@ -17599,8 +17639,8 @@
         };
         LocalWebWindow.prototype.updateContext = function (context) {
             var oldContext = this.context;
-            this.context = Object.assign({}, context, oldContext);
-            this.registry.execute("context-updated", context, oldContext);
+            this.context = Object.assign({}, oldContext, context);
+            this.registry.execute("context-updated", this.context, oldContext);
             return Promise.resolve(this);
         };
         LocalWebWindow.prototype.setContext = function (context) {
@@ -17637,6 +17677,7 @@
         return ChildWebWindow;
     }(RemoteWebWindow));
 
+    var createMethodName = function (id) { return "\"GC.Wnd.\"" + id; };
     var registerChildStartupContext = function (interop, parent, id, name, options) {
         var _a;
         var methodName = createMethodName(id);
@@ -17671,7 +17712,6 @@
             }
         });
     }); };
-    var createMethodName = function (id) { return "\"GC.Wnd.\"" + id; };
 
     var Windows = (function () {
         function Windows(interop, control) {
@@ -17738,6 +17778,7 @@
                             if (!newWindow) {
                                 throw new Error("failed to open a window with url=" + url + " and options=" + optionsString);
                             }
+                            newWindow.focus();
                             newWindow.moveTo(left, top);
                             newWindow.resizeTo(width, height);
                             remoteWindow = new ChildWebWindow(newWindow, id, name, this.control, this);
@@ -17818,713 +17859,6 @@
             });
         };
         return Windows;
-    }());
-
-    var LocalStorage = (function () {
-        function LocalStorage() {
-        }
-        LocalStorage.prototype.getAll = function () {
-            var obj = this.getObjectFromLocalStorage();
-            return Object.values(obj);
-        };
-        LocalStorage.prototype.get = function (name, type) {
-            var obj = this.getObjectFromLocalStorage();
-            var key = this.getKey(name, type);
-            return obj[key];
-        };
-        LocalStorage.prototype.save = function (layout) {
-            var obj = this.getObjectFromLocalStorage();
-            var key = this.getKey(layout.name, layout.type);
-            obj[key] = layout;
-            this.setObjectToLocalStorage(obj);
-            return Promise.resolve(layout);
-        };
-        LocalStorage.prototype.remove = function (name, type) {
-            var obj = this.getObjectFromLocalStorage();
-            var key = this.getKey(name, type);
-            delete obj[key];
-            return Promise.resolve();
-        };
-        LocalStorage.prototype.clear = function () {
-            this.setObjectToLocalStorage({});
-            return Promise.resolve();
-        };
-        LocalStorage.prototype.getObjectFromLocalStorage = function () {
-            var values = window.localStorage.getItem(LocalStorage.KEY);
-            if (values) {
-                return JSON.parse(values);
-            }
-            return {};
-        };
-        LocalStorage.prototype.setObjectToLocalStorage = function (obj) {
-            window.localStorage.setItem(LocalStorage.KEY, JSON.stringify(obj));
-        };
-        LocalStorage.prototype.getKey = function (name, type) {
-            return type + "_" + name;
-        };
-        LocalStorage.KEY = "G0_layouts";
-        return LocalStorage;
-    }());
-
-    var Layouts = (function () {
-        function Layouts(windows, interop, logger, control, config) {
-            var _a, _b;
-            this.windows = windows;
-            this.interop = interop;
-            this.logger = logger;
-            this.control = control;
-            this.storage = new LocalStorage();
-            this.registerRequestMethods();
-            this.control.subscribe("layouts", this.handleControlMessage.bind(this));
-            this.autoSaveContext = (_b = (_a = config === null || config === void 0 ? void 0 : config.layouts) === null || _a === void 0 ? void 0 : _a.autoSaveWindowContext) !== null && _b !== void 0 ? _b : false;
-        }
-        Layouts.prototype.list = function () {
-            return this.storage.getAll();
-        };
-        Layouts.prototype.save = function (layoutOptions) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var openedWindows, components;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (!layoutOptions.name) {
-                                return [2, Promise.reject("missing name for layout " + JSON.stringify(layoutOptions))];
-                            }
-                            openedWindows = this.windows.getChildWindows().map(function (w) { return w.id; });
-                            return [4, this.getRemoteWindowsInfo(openedWindows)];
-                        case 1:
-                            components = _a.sent();
-                            components.push(this.getLocalLayoutComponent(layoutOptions.context, true));
-                            return [2, this.storage.save({
-                                    type: "Global",
-                                    name: layoutOptions.name,
-                                    components: components,
-                                    context: layoutOptions.context || {},
-                                    metadata: layoutOptions.metadata || {}
-                                })];
-                    }
-                });
-            });
-        };
-        Layouts.prototype.restore = function (options) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var layout;
-                var _this = this;
-                return __generator$2(this, function (_a) {
-                    layout = this.list().find(function (l) { return l.name === options.name && l.type === "Global"; });
-                    if (!layout) {
-                        throw new Error("can not find layout with name " + options.name);
-                    }
-                    layout.components.forEach(function (c) {
-                        if (c.type === "window") {
-                            var state = c.state;
-                            if (state.main) {
-                                return;
-                            }
-                            var newWindowOptions = __assign$2(__assign$2({}, state.bounds), { context: state.context });
-                            _this.windows.open(state.name, state.url, newWindowOptions);
-                        }
-                    });
-                    return [2];
-                });
-            });
-        };
-        Layouts.prototype.remove = function (type, name) {
-            this.storage.remove(name, type);
-            return Promise.resolve();
-        };
-        Layouts.prototype.onSaveRequested = function (callback) {
-            var _this = this;
-            this.getLocalInfoCallback = callback;
-            return function () {
-                _this.getLocalInfoCallback = undefined;
-            };
-        };
-        Layouts.prototype.getLocalLayoutComponent = function (context, main) {
-            if (main === void 0) { main = false; }
-            var requestResult;
-            var my = this.windows.my();
-            try {
-                if (this.autoSaveContext) {
-                    requestResult = {
-                        windowContext: my.getContextSync()
-                    };
-                }
-                if (this.getLocalInfoCallback) {
-                    requestResult = this.getLocalInfoCallback(context);
-                }
-            }
-            catch (err) {
-                this.logger.warn("onSaveRequested - error getting data from user function - " + err);
-            }
-            return {
-                type: "window",
-                componentType: "application",
-                state: {
-                    name: my.name,
-                    context: (requestResult === null || requestResult === void 0 ? void 0 : requestResult.windowContext) || {},
-                    bounds: my.getBoundsSync(),
-                    url: window.document.location.href,
-                    id: my.id,
-                    parentId: my.parent,
-                    main: main
-                }
-            };
-        };
-        Layouts.prototype.registerRequestMethods = function () {
-            var _this = this;
-            this.interop.register(Layouts.SaveContextMethodName, function (args) {
-                return _this.getLocalLayoutComponent(args);
-            });
-        };
-        Layouts.prototype.handleControlMessage = function (command) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var layoutCommand, args, components;
-                var _this = this;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            layoutCommand = command;
-                            if (!(layoutCommand.command === "saveLayoutAndClose")) return [3, 3];
-                            args = layoutCommand.args;
-                            return [4, this.getRemoteWindowsInfo(args.childWindows)];
-                        case 1:
-                            components = _a.sent();
-                            components.push(args.parentInfo);
-                            return [4, this.storage.save({
-                                    type: "Global",
-                                    name: args.layoutName,
-                                    components: components,
-                                    context: args.context || {},
-                                    metadata: args.metadata || {}
-                                })];
-                        case 2:
-                            _a.sent();
-                            args.childWindows.forEach(function (cw) {
-                                var _a;
-                                (_a = _this.windows.findById(cw)) === null || _a === void 0 ? void 0 : _a.close();
-                            });
-                            _a.label = 3;
-                        case 3: return [2];
-                    }
-                });
-            });
-        };
-        Layouts.prototype.getRemoteWindowsInfo = function (windows) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var promises, _loop_1, this_1, _i, windows_1, id, responses;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            promises = [];
-                            _loop_1 = function (id) {
-                                var interopServer = this_1.interop.servers().find(function (s) { return s.windowId === id; });
-                                if (!interopServer || !interopServer.getMethods) {
-                                    return "continue";
-                                }
-                                var methods = interopServer.getMethods();
-                                if (methods.find(function (m) { return m.name === Layouts.SaveContextMethodName; })) {
-                                    try {
-                                        promises.push(this_1.interop.invoke(Layouts.SaveContextMethodName, {}, { windowId: id }));
-                                    }
-                                    catch (_a) {
-                                    }
-                                }
-                            };
-                            this_1 = this;
-                            for (_i = 0, windows_1 = windows; _i < windows_1.length; _i++) {
-                                id = windows_1[_i];
-                                _loop_1(id);
-                            }
-                            return [4, Promise.all(promises)];
-                        case 1:
-                            responses = _a.sent();
-                            return [2, responses.map(function (response) { return response.returned; })];
-                    }
-                });
-            });
-        };
-        Layouts.SaveContextMethodName = "T42.HC.GetSaveContext";
-        return Layouts;
-    }());
-
-    var CONTEXT_PREFIX$1 = "___channel___";
-    var SharedContextSubscriber$1 = (function () {
-        function SharedContextSubscriber(contexts) {
-            this.contexts = contexts;
-        }
-        SharedContextSubscriber.prototype.subscribe = function (callback) {
-            this.callback = callback;
-        };
-        SharedContextSubscriber.prototype.subscribeFor = function (name, callback) {
-            if (!this.isChannel(name)) {
-                return Promise.reject(new Error("Channel with name: " + name + " doesn't exist!"));
-            }
-            var contextName = this.createContextName(name);
-            return this.contexts.subscribe(contextName, function (data, _, __, ___, extraData) {
-                callback(data.data, data, extraData === null || extraData === void 0 ? void 0 : extraData.updaterId);
-            });
-        };
-        SharedContextSubscriber.prototype.switchChannel = function (name) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var contextName, _a;
-                var _this = this;
-                return __generator$2(this, function (_b) {
-                    switch (_b.label) {
-                        case 0:
-                            this.unsubscribe();
-                            contextName = this.createContextName(name);
-                            _a = this;
-                            return [4, this.contexts.subscribe(contextName, function (data, _, __, ___, extraData) {
-                                    if (_this.callback) {
-                                        _this.callback(data.data, data, extraData === null || extraData === void 0 ? void 0 : extraData.updaterId);
-                                    }
-                                })];
-                        case 1:
-                            _a.unsubscribeFunc = _b.sent();
-                            return [2];
-                    }
-                });
-            });
-        };
-        SharedContextSubscriber.prototype.unsubscribe = function () {
-            if (this.unsubscribeFunc) {
-                this.unsubscribeFunc();
-            }
-        };
-        SharedContextSubscriber.prototype.add = function (name, data) {
-            var contextName = this.createContextName(name);
-            return this.contexts.set(contextName, data);
-        };
-        SharedContextSubscriber.prototype.all = function () {
-            var contextNames = this.contexts.all();
-            var channelContextNames = contextNames.filter(function (contextName) { return contextName.startsWith(CONTEXT_PREFIX$1); });
-            var channelNames = channelContextNames.map(function (channelContextName) { return channelContextName.substr(CONTEXT_PREFIX$1.length); });
-            return channelNames;
-        };
-        SharedContextSubscriber.prototype.getContextData = function (name) {
-            var _this = this;
-            return new Promise(function (resolve, reject) {
-                if (!_this.isChannel(name)) {
-                    return reject(new Error("A channel with name: " + name + " doesn't exist!"));
-                }
-                var contextName = _this.createContextName(name);
-                _this.contexts.subscribe(contextName, function (data) {
-                    resolve(data);
-                }).then(function (unsubscribeFunc) { return unsubscribeFunc(); });
-            });
-        };
-        SharedContextSubscriber.prototype.update = function (name, data) {
-            var contextName = this.createContextName(name);
-            return this.contexts.update(contextName, data);
-        };
-        SharedContextSubscriber.prototype.createContextName = function (name) {
-            return CONTEXT_PREFIX$1 + name;
-        };
-        SharedContextSubscriber.prototype.isChannel = function (name) {
-            return this.all().some(function (channelName) { return channelName === name; });
-        };
-        return SharedContextSubscriber;
-    }());
-
-    var Channels = (function () {
-        function Channels(contexts, channels) {
-            var _this = this;
-            this.subsKey = "subs";
-            this.changedKey = "changed";
-            this.registry = lib$1$1();
-            this.shared = new SharedContextSubscriber$1(contexts);
-            this.shared.subscribe(this.handler.bind(this));
-            this.readyPromise = Promise.resolve(channels === null || channels === void 0 ? void 0 : channels.reduce(function (promise, channel) {
-                return promise.then(function () { return _this.add(channel); });
-            }, Promise.resolve({})));
-        }
-        Channels.prototype.subscribe = function (callback) {
-            if (typeof callback !== "function") {
-                throw new Error("Please provide the callback as a function!");
-            }
-            return this.registry.add(this.subsKey, callback);
-        };
-        Channels.prototype.subscribeFor = function (name, callback) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var unsubscribeFunc;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (typeof name !== "string") {
-                                throw new Error("Please provide the name as a string!");
-                            }
-                            if (typeof callback !== "function") {
-                                throw new Error("Please provide the callback as a function!");
-                            }
-                            return [4, this.shared.subscribeFor(name, callback)];
-                        case 1:
-                            unsubscribeFunc = _a.sent();
-                            return [2, unsubscribeFunc];
-                    }
-                });
-            });
-        };
-        Channels.prototype.publish = function (data, name) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var context_1;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (typeof data !== "object") {
-                                throw new Error("Please provide the data as an object!");
-                            }
-                            if (!name) return [3, 2];
-                            if (typeof name !== "string") {
-                                throw new Error("Please provide the name as a string!");
-                            }
-                            return [4, this.get(name)];
-                        case 1:
-                            context_1 = _a.sent();
-                            return [2, this.shared.update(context_1.name, { data: data })];
-                        case 2:
-                            if (!this.currentContext) {
-                                throw new Error("Not joined to any channel!");
-                            }
-                            return [2, this.shared.update(this.currentContext, { data: data })];
-                    }
-                });
-            });
-        };
-        Channels.prototype.all = function () {
-            var channelNames = this.shared.all();
-            return Promise.resolve(channelNames);
-        };
-        Channels.prototype.list = function () {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var channelNames, channelContexts;
-                var _this = this;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4, this.all()];
-                        case 1:
-                            channelNames = _a.sent();
-                            return [4, Promise.all(channelNames.map(function (channelName) { return _this.get(channelName); }))];
-                        case 2:
-                            channelContexts = _a.sent();
-                            return [2, channelContexts];
-                    }
-                });
-            });
-        };
-        Channels.prototype.get = function (name) {
-            if (typeof name !== "string") {
-                return Promise.reject(new Error("Please provide the channel name as a string!"));
-            }
-            return this.shared.getContextData(name);
-        };
-        Channels.prototype.join = function (name) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var doesChannelExist, channelExistsPromise;
-                var _this = this;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (typeof name !== "string") {
-                                throw new Error("Please provide the channel name as a string!");
-                            }
-                            doesChannelExist = function (channelName) {
-                                var channelNames = _this.shared.all();
-                                return channelNames.includes(channelName);
-                            };
-                            if (!!doesChannelExist(name)) return [3, 2];
-                            channelExistsPromise = new Promise(function (resolve, reject) {
-                                var timeoutId;
-                                var intervalId = setInterval(function () {
-                                    if (doesChannelExist(name)) {
-                                        clearTimeout(timeoutId);
-                                        clearInterval(intervalId);
-                                        resolve();
-                                    }
-                                }, 100);
-                                timeoutId = setTimeout(function () {
-                                    clearInterval(intervalId);
-                                    return reject(new Error("A channel with name: " + name + " doesn't exist!"));
-                                }, 3000);
-                            });
-                            return [4, channelExistsPromise];
-                        case 1:
-                            _a.sent();
-                            _a.label = 2;
-                        case 2: return [4, this.shared.switchChannel(name)];
-                        case 3:
-                            _a.sent();
-                            this.currentContext = name;
-                            this.registry.execute(this.changedKey, name);
-                            return [2];
-                    }
-                });
-            });
-        };
-        Channels.prototype.leave = function () {
-            this.currentContext = undefined;
-            this.registry.execute(this.changedKey, undefined);
-            this.shared.unsubscribe();
-            return Promise.resolve();
-        };
-        Channels.prototype.current = function () {
-            return this.currentContext;
-        };
-        Channels.prototype.my = function () {
-            return this.current();
-        };
-        Channels.prototype.changed = function (callback) {
-            if (typeof callback !== "function") {
-                throw new Error("Please provide the callback as a function!");
-            }
-            return this.registry.add(this.changedKey, callback);
-        };
-        Channels.prototype.onChanged = function (callback) {
-            return this.changed(callback);
-        };
-        Channels.prototype.add = function (info) {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var context;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (typeof info !== "object") {
-                                throw new Error("Please provide the info as an object!");
-                            }
-                            if (typeof info.name === "undefined") {
-                                throw new Error("info.name is missing!");
-                            }
-                            if (typeof info.name !== "string") {
-                                throw new Error("Please provide the info.name as a string!");
-                            }
-                            if (typeof info.meta === "undefined") {
-                                throw new Error("info.meta is missing!");
-                            }
-                            if (typeof info.meta !== "object") {
-                                throw new Error("Please provide the info.meta as an object!");
-                            }
-                            if (typeof info.meta.color === "undefined") {
-                                throw new Error("info.meta.color is missing!");
-                            }
-                            if (typeof info.meta.color !== "string") {
-                                throw new Error("Please provide the info.meta.color as a string!");
-                            }
-                            context = {
-                                name: info.name,
-                                meta: info.meta || {},
-                                data: info.data || {}
-                            };
-                            return [4, this.shared.update(info.name, context)];
-                        case 1:
-                            _a.sent();
-                            return [2, context];
-                    }
-                });
-            });
-        };
-        Channels.prototype.ready = function () {
-            return this.readyPromise;
-        };
-        Channels.prototype.handler = function (data, context, updaterId) {
-            this.registry.execute(this.subsKey, data, context, updaterId);
-        };
-        return Channels;
-    }());
-
-    var fetchTimeout = function (url, timeoutMilliseconds) {
-        if (timeoutMilliseconds === void 0) { timeoutMilliseconds = 1000; }
-        return new Promise(function (resolve, reject) {
-            var timeoutHit = false;
-            var timeout = setTimeout(function () {
-                timeoutHit = true;
-                reject(new Error("Fetch request for: " + url + " timed out at: " + timeoutMilliseconds + " milliseconds"));
-            }, timeoutMilliseconds);
-            fetch(url)
-                .then(function (response) {
-                if (!timeoutHit) {
-                    clearTimeout(timeout);
-                    resolve(response);
-                }
-            })
-                .catch(function (err) {
-                if (!timeoutHit) {
-                    clearTimeout(timeout);
-                    reject(err);
-                }
-            });
-        });
-    };
-
-    var Application = (function () {
-        function Application(_appManager, _props, _windows) {
-            var _this = this;
-            var _a, _b, _c;
-            this._appManager = _appManager;
-            this._props = _props;
-            this._windows = _windows;
-            this._registry = lib$1$1();
-            if (typeof ((_a = _props === null || _props === void 0 ? void 0 : _props.userProperties) === null || _a === void 0 ? void 0 : _a.manifest) === "undefined") {
-                this._url = (_b = _props === null || _props === void 0 ? void 0 : _props.userProperties) === null || _b === void 0 ? void 0 : _b.details.url;
-            }
-            else {
-                var parsedManifest = JSON.parse(_props.userProperties.manifest);
-                this._url = ((_c = parsedManifest.details) === null || _c === void 0 ? void 0 : _c.url) || parsedManifest.url;
-            }
-            _appManager.onInstanceStarted(function (instance) {
-                if (instance.application.name === _this.name) {
-                    _this._registry.execute("instanceStarted", instance);
-                }
-            });
-            _appManager.onInstanceStopped(function (instance) {
-                if (instance.application.name === _this.name) {
-                    _this._registry.execute("instanceStopped", instance);
-                }
-            });
-        }
-        Object.defineProperty(Application.prototype, "name", {
-            get: function () {
-                return this._props.name;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Application.prototype, "title", {
-            get: function () {
-                return this._props.title || "";
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Application.prototype, "version", {
-            get: function () {
-                return this._props.version || "";
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Application.prototype, "userProperties", {
-            get: function () {
-                return this._props.userProperties || {};
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Application.prototype, "instances", {
-            get: function () {
-                var _this = this;
-                return this._appManager.instances().filter(function (instance) { return instance.application.name === _this.name; });
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Application.prototype.start = function (context, options) {
-            var _this = this;
-            return new Promise(function (resolve, reject) {
-                var _a, _b;
-                var unsubscribeFunc;
-                var timeoutId = setTimeout(function () {
-                    unsubscribeFunc();
-                    reject("Application \"" + _this.name + "\" start timeout!");
-                }, 3000);
-                unsubscribeFunc = _this._appManager.onInstanceStarted(function (instance) {
-                    if (instance.application.name === _this.name) {
-                        clearTimeout(timeoutId);
-                        unsubscribeFunc();
-                        resolve(instance);
-                    }
-                });
-                var openOptions = __assign$2(__assign$2(__assign$2({}, (_b = (_a = _this._props) === null || _a === void 0 ? void 0 : _a.userProperties) === null || _b === void 0 ? void 0 : _b.details), options), { context: context || (options === null || options === void 0 ? void 0 : options.context) });
-                if (!_this._url) {
-                    throw new Error("Application " + _this.name + " doesn't have a URL.");
-                }
-                _this._windows.open(_this.name, _this._url, openOptions);
-            });
-        };
-        Application.prototype.onInstanceStarted = function (callback) {
-            this._registry.add("instanceStarted", callback);
-        };
-        Application.prototype.onInstanceStopped = function (callback) {
-            this._registry.add("instanceStopped", callback);
-        };
-        Application.prototype.updateFromProps = function (props) {
-            var _this = this;
-            var _a, _b;
-            var url = typeof ((_a = props === null || props === void 0 ? void 0 : props.userProperties) === null || _a === void 0 ? void 0 : _a.manifest) !== "undefined" ? JSON.parse(props === null || props === void 0 ? void 0 : props.userProperties.manifest).url : (_b = props === null || props === void 0 ? void 0 : props.userProperties) === null || _b === void 0 ? void 0 : _b.details.url;
-            this._url = url;
-            Object.keys(props).forEach(function (key) {
-                _this._props[key] = props[key];
-            });
-        };
-        return Application;
-    }());
-
-    var RemoteInstance = (function () {
-        function RemoteInstance(id, application, control, context, agm) {
-            this.id = id;
-            this.application = application;
-            this.control = control;
-            this.context = context;
-            this.agm = agm;
-            this.WINDOW_DID_NOT_HAVE_TIME_TO_RESPOND = "Peer has left while waiting for result";
-        }
-        RemoteInstance.prototype.stop = function () {
-            return __awaiter$2(this, void 0, void 0, function () {
-                var error_1;
-                return __generator$2(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            _a.trys.push([0, 2, , 3]);
-                            return [4, this.callControl("stop", {}, false)];
-                        case 1:
-                            _a.sent();
-                            return [3, 3];
-                        case 2:
-                            error_1 = _a.sent();
-                            if (error_1.message !== this.WINDOW_DID_NOT_HAVE_TIME_TO_RESPOND) {
-                                throw new Error(error_1);
-                            }
-                            return [3, 3];
-                        case 3: return [2];
-                    }
-                });
-            });
-        };
-        RemoteInstance.prototype.callControl = function (command, args, skipResult) {
-            if (skipResult === void 0) { skipResult = false; }
-            return this.control.send({ command: command, domain: "appManager", args: args, skipResult: skipResult }, { instance: this.id });
-        };
-        return RemoteInstance;
-    }());
-
-    var LocalInstance = (function () {
-        function LocalInstance(id, control, _appManager, agm) {
-            this.id = id;
-            this.control = control;
-            this._appManager = _appManager;
-            this.agm = agm;
-            this.context = {};
-            this.startedByScript = false;
-            this.application = undefined;
-            control.setLocalInstance(this);
-        }
-        LocalInstance.prototype.stop = function () {
-            var _this = this;
-            return new Promise(function (resolve, reject) {
-                if (_this.startedByScript) {
-                    var unsubscribe_1 = _this._appManager.onInstanceStopped(function (instance) {
-                        if (instance.id === _this.id) {
-                            unsubscribe_1();
-                            resolve();
-                        }
-                    });
-                    window.close();
-                }
-                else {
-                    reject("Can't close a window that wasn't started by a script.");
-                }
-            });
-        };
-        return LocalInstance;
     }());
 
     /**
@@ -19303,6 +18637,8 @@
     var string = Decoder.string;
     /** See `Decoder.number` */
     var number = Decoder.number;
+    /** See `Decoder.boolean` */
+    var boolean = Decoder.boolean;
     /** See `Decoder.anyJson` */
     var anyJson = Decoder.anyJson;
     /** See `Decoder.constant` */
@@ -19315,37 +18651,632 @@
     var optional = Decoder.optional;
     /** See `Decoder.oneOf` */
     var oneOf = Decoder.oneOf;
+    /** See `Decoder.lazy` */
+    var lazy = Decoder.lazy;
 
     var nonEmptyStringDecoder = string().where(function (s) { return s.length > 0; }, "Expected a non-empty string");
+
+    var windowLayoutItemDecoder = object({
+        type: constant("window"),
+        config: object({
+            appName: nonEmptyStringDecoder,
+            url: optional(nonEmptyStringDecoder)
+        })
+    });
+    var groupLayoutItemDecoder = object({
+        type: constant("group"),
+        config: anyJson(),
+        children: array(oneOf(windowLayoutItemDecoder))
+    });
+    var columnLayoutItemDecoder = object({
+        type: constant("column"),
+        config: anyJson(),
+        children: array(oneOf(groupLayoutItemDecoder, windowLayoutItemDecoder, lazy(function () { return columnLayoutItemDecoder; }), lazy(function () { return rowLayoutItemDecoder; })))
+    });
+    var rowLayoutItemDecoder = object({
+        type: constant("row"),
+        config: anyJson(),
+        children: array(oneOf(columnLayoutItemDecoder, groupLayoutItemDecoder, windowLayoutItemDecoder, lazy(function () { return rowLayoutItemDecoder; })))
+    });
+    var workspaceComponentDecoder = object({
+        type: constant("Workspace"),
+        state: object({
+            config: anyJson(),
+            children: array(oneOf(rowLayoutItemDecoder, columnLayoutItemDecoder, groupLayoutItemDecoder, windowLayoutItemDecoder))
+        })
+    });
+
+    var windowComponentDecoder = object({
+        type: constant("window"),
+        componentType: constant("application"),
+        state: object({
+            name: anyJson(),
+            context: anyJson(),
+            url: nonEmptyStringDecoder,
+            bounds: anyJson(),
+            id: nonEmptyStringDecoder,
+            parentId: optional(nonEmptyStringDecoder),
+            main: boolean()
+        })
+    });
+
+    var layoutTypeDecoder = oneOf(constant("Global"), constant("Workspace"));
+    var newLayoutOptionsDecoder = object({
+        name: nonEmptyStringDecoder,
+        context: optional(anyJson()),
+        metadata: optional(anyJson())
+    });
+    var restoreOptionsDecoder = object({
+        name: nonEmptyStringDecoder,
+        context: optional(anyJson()),
+        closeRunningInstance: optional(boolean())
+    });
+    var layoutDecoder = object({
+        name: nonEmptyStringDecoder,
+        type: layoutTypeDecoder,
+        context: optional(anyJson()),
+        metadata: optional(anyJson()),
+        components: array(oneOf(workspaceComponentDecoder, windowComponentDecoder))
+    });
+
+    var Layouts = (function () {
+        function Layouts(controller) {
+            this.controller = controller;
+        }
+        Layouts.prototype.getAll = function (type) {
+            layoutTypeDecoder.runWithException(type);
+            return this.controller.getAll(type);
+        };
+        Layouts.prototype.get = function (name, type) {
+            nonEmptyStringDecoder.runWithException(name);
+            layoutTypeDecoder.runWithException(type);
+            return this.controller.get(name, type);
+        };
+        Layouts.prototype.export = function (layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                return __generator$2(this, function (_a) {
+                    if (layoutType) {
+                        layoutTypeDecoder.runWithException(layoutType);
+                    }
+                    return [2, this.controller.export(layoutType)];
+                });
+            });
+        };
+        Layouts.prototype.import = function (layouts) {
+            layouts.forEach(function (layout) { return layoutDecoder.runWithException(layout); });
+            return this.controller.import(layouts);
+        };
+        Layouts.prototype.save = function (layout) {
+            newLayoutOptionsDecoder.runWithException(layout);
+            return this.controller.save(layout);
+        };
+        Layouts.prototype.restore = function (options) {
+            restoreOptionsDecoder.runWithException(options);
+            return this.controller.restore(options);
+        };
+        Layouts.prototype.remove = function (type, name) {
+            nonEmptyStringDecoder.runWithException(name);
+            layoutTypeDecoder.runWithException(type);
+            return this.controller.remove(type, name);
+        };
+        return Layouts;
+    }());
+
+    var CONTEXT_PREFIX$1 = "___channel___";
+    var SharedContextSubscriber$1 = (function () {
+        function SharedContextSubscriber(contexts) {
+            this.contexts = contexts;
+        }
+        SharedContextSubscriber.prototype.subscribe = function (callback) {
+            this.callback = callback;
+        };
+        SharedContextSubscriber.prototype.subscribeFor = function (name, callback) {
+            if (!this.isChannel(name)) {
+                return Promise.reject(new Error("Channel with name: " + name + " doesn't exist!"));
+            }
+            var contextName = this.createContextName(name);
+            return this.contexts.subscribe(contextName, function (data, _, __, ___, extraData) {
+                callback(data.data, data, extraData === null || extraData === void 0 ? void 0 : extraData.updaterId);
+            });
+        };
+        SharedContextSubscriber.prototype.switchChannel = function (name) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var contextName, _a;
+                var _this = this;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            this.unsubscribe();
+                            contextName = this.createContextName(name);
+                            _a = this;
+                            return [4, this.contexts.subscribe(contextName, function (data, _, __, ___, extraData) {
+                                    if (_this.callback) {
+                                        _this.callback(data.data, data, extraData === null || extraData === void 0 ? void 0 : extraData.updaterId);
+                                    }
+                                })];
+                        case 1:
+                            _a.unsubscribeFunc = _b.sent();
+                            return [2];
+                    }
+                });
+            });
+        };
+        SharedContextSubscriber.prototype.unsubscribe = function () {
+            if (this.unsubscribeFunc) {
+                this.unsubscribeFunc();
+            }
+        };
+        SharedContextSubscriber.prototype.add = function (name, data) {
+            var contextName = this.createContextName(name);
+            return this.contexts.set(contextName, data);
+        };
+        SharedContextSubscriber.prototype.all = function () {
+            var contextNames = this.contexts.all();
+            var channelContextNames = contextNames.filter(function (contextName) { return contextName.startsWith(CONTEXT_PREFIX$1); });
+            var channelNames = channelContextNames.map(function (channelContextName) { return channelContextName.substr(CONTEXT_PREFIX$1.length); });
+            return channelNames;
+        };
+        SharedContextSubscriber.prototype.getContextData = function (name) {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                if (!_this.isChannel(name)) {
+                    return reject(new Error("A channel with name: " + name + " doesn't exist!"));
+                }
+                var contextName = _this.createContextName(name);
+                _this.contexts.subscribe(contextName, function (data) {
+                    resolve(data);
+                }).then(function (unsubscribeFunc) { return unsubscribeFunc(); });
+            });
+        };
+        SharedContextSubscriber.prototype.update = function (name, data) {
+            var contextName = this.createContextName(name);
+            return this.contexts.update(contextName, data);
+        };
+        SharedContextSubscriber.prototype.createContextName = function (name) {
+            return CONTEXT_PREFIX$1 + name;
+        };
+        SharedContextSubscriber.prototype.isChannel = function (name) {
+            return this.all().some(function (channelName) { return channelName === name; });
+        };
+        return SharedContextSubscriber;
+    }());
+
+    var Channels = (function () {
+        function Channels(contexts, channels) {
+            var _this = this;
+            this.subsKey = "subs";
+            this.changedKey = "changed";
+            this.registry = lib$1$1();
+            this.shared = new SharedContextSubscriber$1(contexts);
+            this.shared.subscribe(this.handler.bind(this));
+            this.readyPromise = Promise.resolve(channels === null || channels === void 0 ? void 0 : channels.reduce(function (promise, channel) {
+                return promise.then(function () { return _this.add(channel); });
+            }, Promise.resolve({})));
+        }
+        Channels.prototype.subscribe = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
+            return this.registry.add(this.subsKey, callback);
+        };
+        Channels.prototype.subscribeFor = function (name, callback) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var unsubscribeFunc;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (typeof name !== "string") {
+                                throw new Error("Please provide the name as a string!");
+                            }
+                            if (typeof callback !== "function") {
+                                throw new Error("Please provide the callback as a function!");
+                            }
+                            return [4, this.shared.subscribeFor(name, callback)];
+                        case 1:
+                            unsubscribeFunc = _a.sent();
+                            return [2, unsubscribeFunc];
+                    }
+                });
+            });
+        };
+        Channels.prototype.publish = function (data, name) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var context_1;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (typeof data !== "object") {
+                                throw new Error("Please provide the data as an object!");
+                            }
+                            if (!name) return [3, 2];
+                            if (typeof name !== "string") {
+                                throw new Error("Please provide the name as a string!");
+                            }
+                            return [4, this.get(name)];
+                        case 1:
+                            context_1 = _a.sent();
+                            return [2, this.shared.update(context_1.name, { data: data })];
+                        case 2:
+                            if (!this.currentContext) {
+                                throw new Error("Not joined to any channel!");
+                            }
+                            return [2, this.shared.update(this.currentContext, { data: data })];
+                    }
+                });
+            });
+        };
+        Channels.prototype.all = function () {
+            var channelNames = this.shared.all();
+            return Promise.resolve(channelNames);
+        };
+        Channels.prototype.list = function () {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var channelNames, channelContexts;
+                var _this = this;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, this.all()];
+                        case 1:
+                            channelNames = _a.sent();
+                            return [4, Promise.all(channelNames.map(function (channelName) { return _this.get(channelName); }))];
+                        case 2:
+                            channelContexts = _a.sent();
+                            return [2, channelContexts];
+                    }
+                });
+            });
+        };
+        Channels.prototype.get = function (name) {
+            if (typeof name !== "string") {
+                return Promise.reject(new Error("Please provide the channel name as a string!"));
+            }
+            return this.shared.getContextData(name);
+        };
+        Channels.prototype.join = function (name) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var doesChannelExist, channelExistsPromise;
+                var _this = this;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (typeof name !== "string") {
+                                throw new Error("Please provide the channel name as a string!");
+                            }
+                            doesChannelExist = function (channelName) {
+                                var channelNames = _this.shared.all();
+                                return channelNames.includes(channelName);
+                            };
+                            if (!!doesChannelExist(name)) return [3, 2];
+                            channelExistsPromise = new Promise(function (resolve, reject) {
+                                var timeoutId;
+                                var intervalId = setInterval(function () {
+                                    if (doesChannelExist(name)) {
+                                        clearTimeout(timeoutId);
+                                        clearInterval(intervalId);
+                                        resolve();
+                                    }
+                                }, 100);
+                                timeoutId = setTimeout(function () {
+                                    clearInterval(intervalId);
+                                    return reject(new Error("A channel with name: " + name + " doesn't exist!"));
+                                }, 3000);
+                            });
+                            return [4, channelExistsPromise];
+                        case 1:
+                            _a.sent();
+                            _a.label = 2;
+                        case 2: return [4, this.shared.switchChannel(name)];
+                        case 3:
+                            _a.sent();
+                            this.currentContext = name;
+                            this.registry.execute(this.changedKey, name);
+                            return [2];
+                    }
+                });
+            });
+        };
+        Channels.prototype.leave = function () {
+            this.currentContext = undefined;
+            this.registry.execute(this.changedKey, undefined);
+            this.shared.unsubscribe();
+            return Promise.resolve();
+        };
+        Channels.prototype.current = function () {
+            return this.currentContext;
+        };
+        Channels.prototype.my = function () {
+            return this.current();
+        };
+        Channels.prototype.changed = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
+            return this.registry.add(this.changedKey, callback);
+        };
+        Channels.prototype.onChanged = function (callback) {
+            return this.changed(callback);
+        };
+        Channels.prototype.add = function (info) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var context;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            if (typeof info !== "object") {
+                                throw new Error("Please provide the info as an object!");
+                            }
+                            if (typeof info.name === "undefined") {
+                                throw new Error("info.name is missing!");
+                            }
+                            if (typeof info.name !== "string") {
+                                throw new Error("Please provide the info.name as a string!");
+                            }
+                            if (typeof info.meta === "undefined") {
+                                throw new Error("info.meta is missing!");
+                            }
+                            if (typeof info.meta !== "object") {
+                                throw new Error("Please provide the info.meta as an object!");
+                            }
+                            if (typeof info.meta.color === "undefined") {
+                                throw new Error("info.meta.color is missing!");
+                            }
+                            if (typeof info.meta.color !== "string") {
+                                throw new Error("Please provide the info.meta.color as a string!");
+                            }
+                            context = {
+                                name: info.name,
+                                meta: info.meta,
+                                data: info.data || {}
+                            };
+                            return [4, this.shared.update(info.name, context)];
+                        case 1:
+                            _a.sent();
+                            return [2, context];
+                    }
+                });
+            });
+        };
+        Channels.prototype.ready = function () {
+            return this.readyPromise;
+        };
+        Channels.prototype.handler = function (data, context, updaterId) {
+            this.registry.execute(this.subsKey, data, context, updaterId);
+        };
+        return Channels;
+    }());
+
+    var fetchTimeout = function (url, timeoutMilliseconds) {
+        if (timeoutMilliseconds === void 0) { timeoutMilliseconds = 1000; }
+        return new Promise(function (resolve, reject) {
+            var timeoutHit = false;
+            var timeout = setTimeout(function () {
+                timeoutHit = true;
+                reject(new Error("Fetch request for: " + url + " timed out at: " + timeoutMilliseconds + " milliseconds"));
+            }, timeoutMilliseconds);
+            fetch(url)
+                .then(function (response) {
+                if (!timeoutHit) {
+                    clearTimeout(timeout);
+                    resolve(response);
+                }
+            })
+                .catch(function (err) {
+                if (!timeoutHit) {
+                    clearTimeout(timeout);
+                    reject(err);
+                }
+            });
+        });
+    };
+
+    var Application = (function () {
+        function Application(_appManager, _props, _windows) {
+            var _this = this;
+            var _a, _b, _c, _d;
+            this._appManager = _appManager;
+            this._props = _props;
+            this._windows = _windows;
+            this._registry = lib$1$1();
+            if (typeof ((_a = _props === null || _props === void 0 ? void 0 : _props.userProperties) === null || _a === void 0 ? void 0 : _a.manifest) === "undefined") {
+                this._url = (_c = (_b = _props === null || _props === void 0 ? void 0 : _props.userProperties) === null || _b === void 0 ? void 0 : _b.details) === null || _c === void 0 ? void 0 : _c.url;
+            }
+            else {
+                var parsedManifest = JSON.parse(_props.userProperties.manifest);
+                this._url = ((_d = parsedManifest.details) === null || _d === void 0 ? void 0 : _d.url) || parsedManifest.url;
+            }
+            _appManager.onInstanceStarted(function (instance) {
+                if (instance.application.name === _this.name) {
+                    _this._registry.execute("instanceStarted", instance);
+                }
+            });
+            _appManager.onInstanceStopped(function (instance) {
+                if (instance.application.name === _this.name) {
+                    _this._registry.execute("instanceStopped", instance);
+                }
+            });
+        }
+        Object.defineProperty(Application.prototype, "name", {
+            get: function () {
+                return this._props.name;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "title", {
+            get: function () {
+                return this._props.title || "";
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "version", {
+            get: function () {
+                return this._props.version || "";
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "userProperties", {
+            get: function () {
+                return this._props.userProperties || {};
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Application.prototype, "instances", {
+            get: function () {
+                var _this = this;
+                return this._appManager.instances().filter(function (instance) { return instance.application.name === _this.name; });
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Application.prototype.start = function (context, options) {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                var _a, _b;
+                var unsubscribeFunc;
+                var timeoutId = setTimeout(function () {
+                    unsubscribeFunc();
+                    reject("Application \"" + _this.name + "\" start timeout!");
+                }, 3000);
+                unsubscribeFunc = _this._appManager.onInstanceStarted(function (instance) {
+                    if (instance.application.name === _this.name) {
+                        clearTimeout(timeoutId);
+                        unsubscribeFunc();
+                        resolve(instance);
+                    }
+                });
+                var openOptions = __assign$2(__assign$2(__assign$2({}, (_b = (_a = _this._props) === null || _a === void 0 ? void 0 : _a.userProperties) === null || _b === void 0 ? void 0 : _b.details), options), { context: context || (options === null || options === void 0 ? void 0 : options.context) });
+                if (!_this._url) {
+                    throw new Error("Application " + _this.name + " doesn't have a URL.");
+                }
+                _this._windows.open(_this.name, _this._url, openOptions);
+            });
+        };
+        Application.prototype.onInstanceStarted = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
+            this._registry.add("instanceStarted", callback);
+        };
+        Application.prototype.onInstanceStopped = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
+            this._registry.add("instanceStopped", callback);
+        };
+        Application.prototype.updateFromProps = function (props) {
+            var _this = this;
+            var _a, _b;
+            var url = typeof ((_a = props === null || props === void 0 ? void 0 : props.userProperties) === null || _a === void 0 ? void 0 : _a.manifest) !== "undefined" ? JSON.parse(props === null || props === void 0 ? void 0 : props.userProperties.manifest).url : (_b = props === null || props === void 0 ? void 0 : props.userProperties) === null || _b === void 0 ? void 0 : _b.details.url;
+            this._url = url;
+            Object.keys(props).forEach(function (key) {
+                _this._props[key] = props[key];
+            });
+        };
+        return Application;
+    }());
+
+    var RemoteInstance = (function () {
+        function RemoteInstance(id, application, control, context, agm) {
+            this.id = id;
+            this.application = application;
+            this.control = control;
+            this.context = context;
+            this.agm = agm;
+            this.WINDOW_DID_NOT_HAVE_TIME_TO_RESPOND = "Peer has left while waiting for result";
+        }
+        RemoteInstance.prototype.stop = function () {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var error_1;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            _a.trys.push([0, 2, , 3]);
+                            return [4, this.callControl("stop", {}, false)];
+                        case 1:
+                            _a.sent();
+                            return [3, 3];
+                        case 2:
+                            error_1 = _a.sent();
+                            if (error_1.message !== this.WINDOW_DID_NOT_HAVE_TIME_TO_RESPOND) {
+                                throw new Error(error_1);
+                            }
+                            return [3, 3];
+                        case 3: return [2];
+                    }
+                });
+            });
+        };
+        RemoteInstance.prototype.callControl = function (command, args, skipResult) {
+            if (skipResult === void 0) { skipResult = false; }
+            return this.control.send({ command: command, domain: "appManager", args: args, skipResult: skipResult }, { instance: this.id });
+        };
+        return RemoteInstance;
+    }());
+
+    var LocalInstance = (function () {
+        function LocalInstance(id, control, _appManager, agm) {
+            this.id = id;
+            this.control = control;
+            this._appManager = _appManager;
+            this.agm = agm;
+            this.context = {};
+            this.startedByScript = false;
+            this.application = undefined;
+            control.setLocalInstance(this);
+        }
+        LocalInstance.prototype.stop = function () {
+            var _this = this;
+            return new Promise(function (resolve, reject) {
+                if (_this.startedByScript) {
+                    var unsubscribe_1 = _this._appManager.onInstanceStopped(function (instance) {
+                        if (instance.id === _this.id) {
+                            unsubscribe_1();
+                            resolve();
+                        }
+                    });
+                    window.close();
+                }
+                else {
+                    reject("Can't close a window that wasn't started by a script.");
+                }
+            });
+        };
+        return LocalInstance;
+    }());
+
+    var nonEmptyStringDecoder$1 = string().where(function (s) { return s.length > 0; }, "Expected a non-empty string");
     var fdc3AppImageDecoder = object({
-        url: optional(nonEmptyStringDecoder)
+        url: optional(nonEmptyStringDecoder$1)
     });
     var fdc3IconDecoder = object({
-        icon: optional(nonEmptyStringDecoder)
+        icon: optional(nonEmptyStringDecoder$1)
     });
     var fdc3IntentDecoder = object({
-        name: nonEmptyStringDecoder,
+        name: nonEmptyStringDecoder$1,
         displayName: optional(string()),
         contexts: optional(array(string())),
         customConfig: optional(object())
     });
     var glue42CoreCreateOptionsDecoder = object({
-        url: nonEmptyStringDecoder,
+        url: nonEmptyStringDecoder$1,
         top: optional(number()),
         left: optional(number()),
         width: optional(number()),
         height: optional(number()),
         context: optional(anyJson()),
-        relativeTo: optional(nonEmptyStringDecoder),
+        relativeTo: optional(nonEmptyStringDecoder$1),
         relativeDirection: optional(oneOf(constant("top"), constant("left"), constant("right"), constant("bottom")))
     });
     var fdc3ApplicationConfigDecoder = object({
-        name: nonEmptyStringDecoder,
+        name: nonEmptyStringDecoder$1,
         title: optional(string()),
         version: optional(string()),
-        appId: nonEmptyStringDecoder,
-        manifest: nonEmptyStringDecoder,
-        manifestType: nonEmptyStringDecoder,
+        appId: nonEmptyStringDecoder$1,
+        manifest: nonEmptyStringDecoder$1,
+        manifestType: nonEmptyStringDecoder$1,
         tooltip: optional(string()),
         description: optional(string()),
         contactEmail: optional(string()),
@@ -19357,7 +19288,7 @@
         intents: optional(array(fdc3IntentDecoder))
     });
     var glue42CoreApplicationConfigDecoder = object({
-        name: nonEmptyStringDecoder,
+        name: nonEmptyStringDecoder$1,
         title: optional(string()),
         version: optional(string()),
         details: glue42CoreCreateOptionsDecoder,
@@ -19405,7 +19336,11 @@
             configurable: true
         });
         AppManager.prototype.application = function (name) {
-            return this._apps[name].application;
+            var _a;
+            if (typeof name !== "string") {
+                throw new Error("Please provide the name as a string!");
+            }
+            return (_a = this._apps[name]) === null || _a === void 0 ? void 0 : _a.application;
         };
         AppManager.prototype.applications = function () {
             var _this = this;
@@ -19416,22 +19351,36 @@
         };
         AppManager.prototype.onAppAdded = function (callback) {
             var _this = this;
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
             var applications = Object.keys(this._apps).map(function (appName) {
                 return _this._apps[appName].application;
             });
-            this.replay(applications, callback);
-            return this.registry.add("appAdded", callback);
+            return this.registry.add("appAdded", callback, applications);
         };
         AppManager.prototype.onAppRemoved = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
             return this.registry.add("appRemoved", callback);
         };
         AppManager.prototype.onAppChanged = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
             return this.registry.add("appChanged", callback);
         };
         AppManager.prototype.onInstanceStarted = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
             return this.registry.add("instanceStarted", callback);
         };
         AppManager.prototype.onInstanceStopped = function (callback) {
+            if (typeof callback !== "function") {
+                throw new Error("Please provide the callback as a function!");
+            }
             return this.registry.add("instanceStopped", callback);
         };
         AppManager.prototype.getValidatedApplications = function (applications) {
@@ -19480,16 +19429,16 @@
             }
         };
         AppManager.prototype.getAppProps = function (application) {
-            var requiredProps = ["name", "title", "version"];
+            var propsToIgnore = ["name", "title", "version", "customProperties"];
             var userProperties = Object.fromEntries(Object.entries(application).filter(function (_a) {
                 var key = _a[0];
-                return !requiredProps.includes(key);
+                return !propsToIgnore.includes(key);
             }));
             return {
                 name: application.name,
                 title: application.title,
                 version: application.version,
-                userProperties: userProperties
+                userProperties: __assign$2(__assign$2({}, userProperties), application.customProperties)
             };
         };
         AppManager.prototype.handleAppsChanged = function (newlyAddedApplications, source) {
@@ -19582,10 +19531,6 @@
             if (!this._myInstance.application) {
                 this.tryPopulateMyInstanceApplication();
             }
-        };
-        AppManager.prototype.replay = function (items, callback) {
-            var itemsToReplay = Array.isArray(items) ? items : Object.values(items);
-            itemsToReplay.forEach(function (item) { return callback(item); });
         };
         AppManager.prototype.remoteFromServer = function (server) {
             return __awaiter$2(this, void 0, void 0, function () {
@@ -19696,35 +19641,41 @@
         return Notifications;
     }());
 
-    var defaultSharedLocation = "/glue/";
-    var defaultConfigName = "glue.config.json";
+    var defaultAssetsBaseLocation = "/glue";
     var defaultWorkerName = "worker.js";
-    var defaultConfigLocation = "" + defaultSharedLocation + defaultConfigName;
-    var defaultWorkerLocation = "" + defaultSharedLocation + defaultWorkerName;
+    var defaultConfigName = "glue.config.json";
+    var defaultLayoutsName = "glue.layouts.json";
+    var defaultWorkerLocation = defaultAssetsBaseLocation + "/" + defaultWorkerName;
     var defaultConfig = {
-        worker: defaultWorkerLocation,
-        extends: defaultConfigLocation,
         layouts: {
             autoRestore: false,
             autoSaveWindowContext: false
         },
         logger: "error",
+        assets: {
+            location: defaultAssetsBaseLocation
+        },
+        channels: false,
+        appManager: false,
+        libraries: []
     };
 
     var getRemoteConfig = function (userConfig) { return __awaiter$2(void 0, void 0, void 0, function () {
-        var extend, response, json, _a;
+        var remoteConfigLocation, response, json, _a;
         var _b, _c;
         return __generator$2(this, function (_d) {
             switch (_d.label) {
                 case 0:
-                    extend = (_c = (_b = userConfig.extends) !== null && _b !== void 0 ? _b : defaultConfig.extends) !== null && _c !== void 0 ? _c : defaultConfigLocation;
-                    if (extend === false) {
+                    if (((_b = userConfig.assets) === null || _b === void 0 ? void 0 : _b.extendConfig) === false || userConfig.extends === false) {
                         return [2, {}];
                     }
+                    remoteConfigLocation = ((_c = userConfig.assets) === null || _c === void 0 ? void 0 : _c.location) ? userConfig.assets.location + "/" + defaultConfigName :
+                        typeof userConfig.extends === "string" ? userConfig.extends :
+                            defaultAssetsBaseLocation + "/" + defaultConfigName;
                     _d.label = 1;
                 case 1:
                     _d.trys.push([1, 4, , 5]);
-                    return [4, fetchTimeout(extend)];
+                    return [4, fetchTimeout(remoteConfigLocation)];
                 case 2:
                     response = _d.sent();
                     if (!response.ok) {
@@ -19751,40 +19702,891 @@
                 case 1:
                     remoteConfig = _a.sent();
                     resultWebConfig = __assign$2(__assign$2(__assign$2({}, defaultConfig), remoteConfig.glue), userConfig);
-                    if (resultWebConfig === null || resultWebConfig === void 0 ? void 0 : resultWebConfig.extends) {
+                    resultWebConfig.worker = resultWebConfig.assets.location + "/" + defaultWorkerName;
+                    if (typeof (resultWebConfig === null || resultWebConfig === void 0 ? void 0 : resultWebConfig.extends) === "string") {
                         lastIndex = resultWebConfig.extends.lastIndexOf("/");
                         worker = resultWebConfig.extends.substr(0, lastIndex + 1) + defaultWorkerName;
                         resultWebConfig.worker = worker;
+                    }
+                    if (!remoteConfig.layouts) {
+                        remoteConfig.layouts = { remoteType: "json" };
                     }
                     return [2, __assign$2(__assign$2({}, remoteConfig), { glue: resultWebConfig })];
             }
         });
     }); };
 
-    var restoreAutoSavedLayout = function (api) {
-        var layoutName = "_auto_" + document.location.href;
-        var layout = api.layouts.list().find(function (l) { return l.name === layoutName; });
-        if (!layout) {
-            return Promise.resolve();
+    var dbName = "glue42core";
+    var dbVersion = 1;
+    var SaveContextMethodName$1 = "T42.HC.GetSaveContext";
+
+    var LayoutsController = (function () {
+        function LayoutsController(storage, windows, control, interop, config) {
+            var _a, _b;
+            this.storage = storage;
+            this.windows = windows;
+            this.control = control;
+            this.interop = interop;
+            this.autoSaveContext = (_b = (_a = config === null || config === void 0 ? void 0 : config.layouts) === null || _a === void 0 ? void 0 : _a.autoSaveWindowContext) !== null && _b !== void 0 ? _b : false;
+            this.control.subscribe("layouts", this.handleControlMessage.bind(this));
+            this.registerRequestMethods();
         }
-        var my = api.windows.my();
-        if (my.parent) {
-            return Promise.resolve();
+        LayoutsController.prototype.export = function (layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var _a, globalLayouts, workspaceLayouts;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            if (layoutType) {
+                                return [2, this.storage.getAll(layoutType)];
+                            }
+                            return [4, Promise.all([
+                                    this.storage.getAll("Global"),
+                                    this.storage.getAll("Workspace")
+                                ])];
+                        case 1:
+                            _a = _b.sent(), globalLayouts = _a[0], workspaceLayouts = _a[1];
+                            return [2, globalLayouts.concat(workspaceLayouts)];
+                    }
+                });
+            });
+        };
+        LayoutsController.prototype.import = function (layouts) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var _this = this;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, Promise.all(layouts.map(function (layout) { return _this.storage.store(layout, layout.type); }))];
+                        case 1:
+                            _a.sent();
+                            return [2];
+                    }
+                });
+            });
+        };
+        LayoutsController.prototype.save = function (layoutOptions, autoSave) {
+            if (autoSave === void 0) { autoSave = false; }
+            return __awaiter$2(this, void 0, void 0, function () {
+                var openedWindows, components, layout;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            openedWindows = this.windows.getChildWindows().map(function (w) { return w.id; });
+                            return [4, this.getRemoteWindowsInfo(openedWindows)];
+                        case 1:
+                            components = _a.sent();
+                            components.push(this.getLocalLayoutComponent(layoutOptions.context, true));
+                            layout = {
+                                type: "Global",
+                                name: layoutOptions.name,
+                                components: components,
+                                context: layoutOptions.context || {},
+                                metadata: layoutOptions.metadata || {}
+                            };
+                            if (!autoSave) return [3, 2];
+                            this.storage.storeAutoLayout(layout);
+                            return [3, 4];
+                        case 2: return [4, this.storage.store(layout, "Global")];
+                        case 3:
+                            _a.sent();
+                            _a.label = 4;
+                        case 4: return [2, layout];
+                    }
+                });
+            });
+        };
+        LayoutsController.prototype.autoSave = function (layoutOptions) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                return __generator$2(this, function (_a) {
+                    return [2, this.save(layoutOptions, true)];
+                });
+            });
+        };
+        LayoutsController.prototype.restore = function (options) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var layout;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, this.storage.get(options.name, "Global")];
+                        case 1:
+                            layout = _a.sent();
+                            if (!layout) {
+                                throw new Error("can not find layout with name " + options.name);
+                            }
+                            this.restoreComponents(layout);
+                            return [2];
+                    }
+                });
+            });
+        };
+        LayoutsController.prototype.restoreAutoSavedLayout = function () {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var layoutName, layout, my, mainComponent;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            layoutName = "_auto_" + document.location.href;
+                            return [4, this.storage.getAutoLayout(layoutName)];
+                        case 1:
+                            layout = _a.sent();
+                            if (!layout) {
+                                return [2, Promise.resolve()];
+                            }
+                            my = this.windows.my();
+                            if (my.parent) {
+                                return [2];
+                            }
+                            mainComponent = layout.components.find(function (c) { return c.state.main; });
+                            my.setContext(mainComponent === null || mainComponent === void 0 ? void 0 : mainComponent.state.context);
+                            try {
+                                this.restoreComponents(layout);
+                            }
+                            catch (e) {
+                                return [2];
+                            }
+                            return [2];
+                    }
+                });
+            });
+        };
+        LayoutsController.prototype.remove = function (type, name) {
+            return this.storage.remove(name, type);
+        };
+        LayoutsController.prototype.getAll = function (type) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var allLayouts;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, this.storage.getAll(type)];
+                        case 1:
+                            allLayouts = _a.sent();
+                            return [2, allLayouts.map(function (layout) {
+                                    return {
+                                        name: layout.name,
+                                        type: layout.type,
+                                        context: layout.context,
+                                        metadata: layout.metadata
+                                    };
+                                })];
+                    }
+                });
+            });
+        };
+        LayoutsController.prototype.get = function (name, type) {
+            return this.storage.get(name, type);
+        };
+        LayoutsController.prototype.getLocalLayoutComponent = function (context, main) {
+            if (main === void 0) { main = false; }
+            var requestResult;
+            var my = this.windows.my();
+            try {
+                if (this.autoSaveContext) {
+                    requestResult = {
+                        windowContext: my.getContextSync()
+                    };
+                }
+            }
+            catch (err) {
+            }
+            return {
+                type: "window",
+                componentType: "application",
+                state: {
+                    name: my.name,
+                    context: (requestResult === null || requestResult === void 0 ? void 0 : requestResult.windowContext) || {},
+                    bounds: my.getBoundsSync(),
+                    url: window.document.location.href,
+                    id: my.id,
+                    parentId: my.parent,
+                    main: main
+                }
+            };
+        };
+        LayoutsController.prototype.restoreComponents = function (layout) {
+            var _this = this;
+            layout.components.forEach(function (c) {
+                if (c.type === "window") {
+                    var state = c.state;
+                    if (state.main) {
+                        return;
+                    }
+                    var newWindowOptions = __assign$2(__assign$2({}, state.bounds), { context: state.context });
+                    _this.windows.open(state.name, state.url, newWindowOptions);
+                }
+            });
+        };
+        LayoutsController.prototype.getRemoteWindowsInfo = function (windows) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var promises, _loop_1, this_1, _i, windows_1, id, responses;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            promises = [];
+                            _loop_1 = function (id) {
+                                var interopServer = this_1.interop.servers().find(function (s) { return s.windowId === id; });
+                                if (!interopServer || !interopServer.getMethods) {
+                                    return "continue";
+                                }
+                                var methods = interopServer.getMethods();
+                                if (methods.find(function (m) { return m.name === SaveContextMethodName$1; })) {
+                                    try {
+                                        promises.push(this_1.interop.invoke(SaveContextMethodName$1, {}, { windowId: id }));
+                                    }
+                                    catch (_a) {
+                                    }
+                                }
+                            };
+                            this_1 = this;
+                            for (_i = 0, windows_1 = windows; _i < windows_1.length; _i++) {
+                                id = windows_1[_i];
+                                _loop_1(id);
+                            }
+                            return [4, Promise.all(promises)];
+                        case 1:
+                            responses = _a.sent();
+                            return [2, responses.map(function (response) { return response.returned; })];
+                    }
+                });
+            });
+        };
+        LayoutsController.prototype.registerRequestMethods = function () {
+            var _this = this;
+            this.interop.register(SaveContextMethodName$1, function (args) {
+                return _this.getLocalLayoutComponent(args);
+            });
+        };
+        LayoutsController.prototype.handleControlMessage = function (command) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var layoutCommand, args, components;
+                var _this = this;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            layoutCommand = command;
+                            if (!(layoutCommand.command === "saveLayoutAndClose")) return [3, 3];
+                            args = layoutCommand.args;
+                            return [4, this.getRemoteWindowsInfo(args.childWindows)];
+                        case 1:
+                            components = _a.sent();
+                            components.push(args.parentInfo);
+                            return [4, this.storage.storeAutoLayout({
+                                    type: "Global",
+                                    name: args.layoutName,
+                                    components: components,
+                                    context: args.context || {},
+                                    metadata: args.metadata || {}
+                                })];
+                        case 2:
+                            _a.sent();
+                            args.childWindows.forEach(function (cw) {
+                                var _a;
+                                (_a = _this.windows.findById(cw)) === null || _a === void 0 ? void 0 : _a.close();
+                            });
+                            _a.label = 3;
+                        case 3: return [2];
+                    }
+                });
+            });
+        };
+        return LayoutsController;
+    }());
+
+    var LayoutStorage = (function () {
+        function LayoutStorage(localStore, autoStore, remoteStore) {
+            this.localStore = localStore;
+            this.autoStore = autoStore;
+            this.remoteStore = remoteStore;
         }
-        api.logger.info("restoring layout " + layoutName);
-        var mainComponent = layout.components.find(function (c) { return c.state.main; });
-        my.setContext(mainComponent === null || mainComponent === void 0 ? void 0 : mainComponent.state.context);
-        try {
-            return api.layouts.restore({
-                name: layoutName,
-                closeRunningInstance: false,
+        LayoutStorage.prototype.get = function (name, layoutType) {
+            var _a;
+            return __awaiter$2(this, void 0, void 0, function () {
+                var foundRemote, foundLocal;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4, ((_a = this.remoteStore) === null || _a === void 0 ? void 0 : _a.get(name, layoutType))];
+                        case 1:
+                            foundRemote = _b.sent();
+                            return [4, this.localStore.get(name, layoutType)];
+                        case 2:
+                            foundLocal = _b.sent();
+                            if (foundRemote && foundLocal) {
+                                return [2, foundRemote];
+                            }
+                            return [2, foundRemote || foundLocal];
+                    }
+                });
+            });
+        };
+        LayoutStorage.prototype.getAll = function (layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var _a, local, remote, nonConflictLocal;
+                var _this = this;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4, Promise.all([
+                                this.localStore.getAll(layoutType),
+                                new Promise(function (resolve) {
+                                    if (_this.remoteStore) {
+                                        return _this.remoteStore.getAll(layoutType).then(resolve);
+                                    }
+                                    resolve([]);
+                                })
+                            ])];
+                        case 1:
+                            _a = _b.sent(), local = _a[0], remote = _a[1];
+                            nonConflictLocal = local.filter(function (localLayout) { return !remote.some(function (remoteLayout) { return remoteLayout.name === localLayout.name; }); });
+                            return [2, remote.concat(nonConflictLocal)];
+                    }
+                });
+            });
+        };
+        LayoutStorage.prototype.store = function (layout, layoutType) {
+            var _a;
+            return __awaiter$2(this, void 0, void 0, function () {
+                var remoteLayout;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4, ((_a = this.remoteStore) === null || _a === void 0 ? void 0 : _a.get(layout.name, layoutType))];
+                        case 1:
+                            remoteLayout = _b.sent();
+                            if (remoteLayout) {
+                                throw new Error("Cannot save layout with name: " + layout.name + " and type: " + layoutType + ", because it is present in the remote store and is treated as readonly");
+                            }
+                            if (!layout.metadata) {
+                                layout.metadata = { allowSave: true };
+                            }
+                            else {
+                                layout.metadata.allowSave = true;
+                            }
+                            return [4, this.localStore.store(layout, layoutType)];
+                        case 2:
+                            _b.sent();
+                            return [2];
+                    }
+                });
+            });
+        };
+        LayoutStorage.prototype.remove = function (name, layoutType) {
+            var _a;
+            return __awaiter$2(this, void 0, void 0, function () {
+                var remoteLayout;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0: return [4, ((_a = this.remoteStore) === null || _a === void 0 ? void 0 : _a.get(name, layoutType))];
+                        case 1:
+                            remoteLayout = _b.sent();
+                            if (remoteLayout) {
+                                throw new Error("Cannot remove layout with name: " + name + " and type: " + layoutType + ", because it is present in the remote store and is treated as readonly");
+                            }
+                            return [4, this.localStore.delete(name, layoutType)];
+                        case 2:
+                            _b.sent();
+                            return [2];
+                    }
+                });
+            });
+        };
+        LayoutStorage.prototype.getAutoLayout = function (name) {
+            return this.autoStore.get(name, "Global");
+        };
+        LayoutStorage.prototype.storeAutoLayout = function (layout) {
+            this.autoStore.save(layout);
+        };
+        return LayoutStorage;
+    }());
+
+    const instanceOfAny = (object, constructors) => constructors.some((c) => object instanceof c);
+
+    let idbProxyableTypes;
+    let cursorAdvanceMethods;
+    // This is a function to prevent it throwing up in node environments.
+    function getIdbProxyableTypes() {
+        return (idbProxyableTypes ||
+            (idbProxyableTypes = [
+                IDBDatabase,
+                IDBObjectStore,
+                IDBIndex,
+                IDBCursor,
+                IDBTransaction,
+            ]));
+    }
+    // This is a function to prevent it throwing up in node environments.
+    function getCursorAdvanceMethods() {
+        return (cursorAdvanceMethods ||
+            (cursorAdvanceMethods = [
+                IDBCursor.prototype.advance,
+                IDBCursor.prototype.continue,
+                IDBCursor.prototype.continuePrimaryKey,
+            ]));
+    }
+    const cursorRequestMap = new WeakMap();
+    const transactionDoneMap = new WeakMap();
+    const transactionStoreNamesMap = new WeakMap();
+    const transformCache = new WeakMap();
+    const reverseTransformCache = new WeakMap();
+    function promisifyRequest(request) {
+        const promise = new Promise((resolve, reject) => {
+            const unlisten = () => {
+                request.removeEventListener('success', success);
+                request.removeEventListener('error', error);
+            };
+            const success = () => {
+                resolve(wrap(request.result));
+                unlisten();
+            };
+            const error = () => {
+                reject(request.error);
+                unlisten();
+            };
+            request.addEventListener('success', success);
+            request.addEventListener('error', error);
+        });
+        promise
+            .then((value) => {
+            // Since cursoring reuses the IDBRequest (*sigh*), we cache it for later retrieval
+            // (see wrapFunction).
+            if (value instanceof IDBCursor) {
+                cursorRequestMap.set(value, request);
+            }
+            // Catching to avoid "Uncaught Promise exceptions"
+        })
+            .catch(() => { });
+        // This mapping exists in reverseTransformCache but doesn't doesn't exist in transformCache. This
+        // is because we create many promises from a single IDBRequest.
+        reverseTransformCache.set(promise, request);
+        return promise;
+    }
+    function cacheDonePromiseForTransaction(tx) {
+        // Early bail if we've already created a done promise for this transaction.
+        if (transactionDoneMap.has(tx))
+            return;
+        const done = new Promise((resolve, reject) => {
+            const unlisten = () => {
+                tx.removeEventListener('complete', complete);
+                tx.removeEventListener('error', error);
+                tx.removeEventListener('abort', error);
+            };
+            const complete = () => {
+                resolve();
+                unlisten();
+            };
+            const error = () => {
+                reject(tx.error || new DOMException('AbortError', 'AbortError'));
+                unlisten();
+            };
+            tx.addEventListener('complete', complete);
+            tx.addEventListener('error', error);
+            tx.addEventListener('abort', error);
+        });
+        // Cache it for later retrieval.
+        transactionDoneMap.set(tx, done);
+    }
+    let idbProxyTraps = {
+        get(target, prop, receiver) {
+            if (target instanceof IDBTransaction) {
+                // Special handling for transaction.done.
+                if (prop === 'done')
+                    return transactionDoneMap.get(target);
+                // Polyfill for objectStoreNames because of Edge.
+                if (prop === 'objectStoreNames') {
+                    return target.objectStoreNames || transactionStoreNamesMap.get(target);
+                }
+                // Make tx.store return the only store in the transaction, or undefined if there are many.
+                if (prop === 'store') {
+                    return receiver.objectStoreNames[1]
+                        ? undefined
+                        : receiver.objectStore(receiver.objectStoreNames[0]);
+                }
+            }
+            // Else transform whatever we get back.
+            return wrap(target[prop]);
+        },
+        set(target, prop, value) {
+            target[prop] = value;
+            return true;
+        },
+        has(target, prop) {
+            if (target instanceof IDBTransaction &&
+                (prop === 'done' || prop === 'store')) {
+                return true;
+            }
+            return prop in target;
+        },
+    };
+    function replaceTraps(callback) {
+        idbProxyTraps = callback(idbProxyTraps);
+    }
+    function wrapFunction(func) {
+        // Due to expected object equality (which is enforced by the caching in `wrap`), we
+        // only create one new func per func.
+        // Edge doesn't support objectStoreNames (booo), so we polyfill it here.
+        if (func === IDBDatabase.prototype.transaction &&
+            !('objectStoreNames' in IDBTransaction.prototype)) {
+            return function (storeNames, ...args) {
+                const tx = func.call(unwrap(this), storeNames, ...args);
+                transactionStoreNamesMap.set(tx, storeNames.sort ? storeNames.sort() : [storeNames]);
+                return wrap(tx);
+            };
+        }
+        // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
+        // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
+        // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
+        // with real promises, so each advance methods returns a new promise for the cursor object, or
+        // undefined if the end of the cursor has been reached.
+        if (getCursorAdvanceMethods().includes(func)) {
+            return function (...args) {
+                // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+                // the original object.
+                func.apply(unwrap(this), args);
+                return wrap(cursorRequestMap.get(this));
+            };
+        }
+        return function (...args) {
+            // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+            // the original object.
+            return wrap(func.apply(unwrap(this), args));
+        };
+    }
+    function transformCachableValue(value) {
+        if (typeof value === 'function')
+            return wrapFunction(value);
+        // This doesn't return, it just creates a 'done' promise for the transaction,
+        // which is later returned for transaction.done (see idbObjectHandler).
+        if (value instanceof IDBTransaction)
+            cacheDonePromiseForTransaction(value);
+        if (instanceOfAny(value, getIdbProxyableTypes()))
+            return new Proxy(value, idbProxyTraps);
+        // Return the same value back if we're not going to transform it.
+        return value;
+    }
+    function wrap(value) {
+        // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
+        // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
+        if (value instanceof IDBRequest)
+            return promisifyRequest(value);
+        // If we've already transformed this value before, reuse the transformed value.
+        // This is faster, but it also provides object equality.
+        if (transformCache.has(value))
+            return transformCache.get(value);
+        const newValue = transformCachableValue(value);
+        // Not all types are transformed.
+        // These may be primitive types, so they can't be WeakMap keys.
+        if (newValue !== value) {
+            transformCache.set(value, newValue);
+            reverseTransformCache.set(newValue, value);
+        }
+        return newValue;
+    }
+    const unwrap = (value) => reverseTransformCache.get(value);
+
+    /**
+     * Open a database.
+     *
+     * @param name Name of the database.
+     * @param version Schema version.
+     * @param callbacks Additional callbacks.
+     */
+    function openDB(name, version, { blocked, upgrade, blocking, terminated } = {}) {
+        const request = indexedDB.open(name, version);
+        const openPromise = wrap(request);
+        if (upgrade) {
+            request.addEventListener('upgradeneeded', (event) => {
+                upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction));
             });
         }
-        catch (e) {
-            api.logger.error(e);
-            return Promise.resolve();
+        if (blocked)
+            request.addEventListener('blocked', () => blocked());
+        openPromise
+            .then((db) => {
+            if (terminated)
+                db.addEventListener('close', () => terminated());
+            if (blocking)
+                db.addEventListener('versionchange', () => blocking());
+        })
+            .catch(() => { });
+        return openPromise;
+    }
+
+    const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
+    const writeMethods = ['put', 'add', 'delete', 'clear'];
+    const cachedMethods = new Map();
+    function getMethod(target, prop) {
+        if (!(target instanceof IDBDatabase &&
+            !(prop in target) &&
+            typeof prop === 'string')) {
+            return;
         }
-    };
+        if (cachedMethods.get(prop))
+            return cachedMethods.get(prop);
+        const targetFuncName = prop.replace(/FromIndex$/, '');
+        const useIndex = prop !== targetFuncName;
+        const isWrite = writeMethods.includes(targetFuncName);
+        if (
+        // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+        !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) ||
+            !(isWrite || readMethods.includes(targetFuncName))) {
+            return;
+        }
+        const method = async function (storeName, ...args) {
+            // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
+            const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
+            let target = tx.store;
+            if (useIndex)
+                target = target.index(args.shift());
+            const returnVal = await target[targetFuncName](...args);
+            if (isWrite)
+                await tx.done;
+            return returnVal;
+        };
+        cachedMethods.set(prop, method);
+        return method;
+    }
+    replaceTraps((oldTraps) => ({
+        ...oldTraps,
+        get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+        has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop),
+    }));
+
+    var LocalStore = (function () {
+        function LocalStore() {
+            if (!("indexedDB" in window)) {
+                throw new Error("Cannot initialize the local storage, because IndexedDb is not supported");
+            }
+        }
+        Object.defineProperty(LocalStore.prototype, "database", {
+            get: function () {
+                var _this = this;
+                if (this._database) {
+                    return Promise.resolve(this._database);
+                }
+                return new Promise(function (resolve) {
+                    openDB(dbName, dbVersion, { upgrade: _this.setUpDb.bind(_this) })
+                        .then(function (database) {
+                        _this._database = database;
+                        resolve(_this._database);
+                    });
+                });
+            },
+            enumerable: true,
+            configurable: true
+        });
+        LocalStore.prototype.getAll = function (layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var _a;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = layoutType;
+                            switch (_a) {
+                                case "Workspace": return [3, 1];
+                                case "Global": return [3, 3];
+                            }
+                            return [3, 5];
+                        case 1: return [4, this.database];
+                        case 2: return [2, (_b.sent()).getAll("workspaceLayouts")];
+                        case 3: return [4, this.database];
+                        case 4: return [2, (_b.sent()).getAll("globalLayouts")];
+                        case 5: throw new Error("The provided layout type is not recognized: " + layoutType);
+                    }
+                });
+            });
+        };
+        LocalStore.prototype.delete = function (name, layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var _a;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = layoutType;
+                            switch (_a) {
+                                case "Workspace": return [3, 1];
+                                case "Global": return [3, 3];
+                            }
+                            return [3, 5];
+                        case 1: return [4, this.database];
+                        case 2: return [2, (_b.sent()).delete("workspaceLayouts", name)];
+                        case 3: return [4, this.database];
+                        case 4: return [2, (_b.sent()).delete("globalLayouts", name)];
+                        case 5: throw new Error("The provided layout type is not recognized: " + layoutType);
+                    }
+                });
+            });
+        };
+        LocalStore.prototype.get = function (name, layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var _a;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            _a = layoutType;
+                            switch (_a) {
+                                case "Workspace": return [3, 1];
+                                case "Global": return [3, 3];
+                            }
+                            return [3, 5];
+                        case 1: return [4, this.database];
+                        case 2: return [2, (_b.sent()).get("workspaceLayouts", name)];
+                        case 3: return [4, this.database];
+                        case 4: return [2, (_b.sent()).get("globalLayouts", name)];
+                        case 5: throw new Error("The provided layout type is not recognized: " + layoutType);
+                    }
+                });
+            });
+        };
+        LocalStore.prototype.store = function (layout, layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var _a;
+                return __generator$2(this, function (_b) {
+                    switch (_b.label) {
+                        case 0:
+                            layoutDecoder.runWithException(layout);
+                            layoutTypeDecoder.runWithException(layoutType);
+                            _a = layoutType;
+                            switch (_a) {
+                                case "Workspace": return [3, 1];
+                                case "Global": return [3, 3];
+                            }
+                            return [3, 5];
+                        case 1: return [4, this.database];
+                        case 2: return [2, (_b.sent()).put("workspaceLayouts", layout, layout.name)];
+                        case 3: return [4, this.database];
+                        case 4: return [2, (_b.sent()).put("globalLayouts", layout, layout.name)];
+                        case 5: throw new Error("The provided layout type is not recognized: " + layoutType);
+                    }
+                });
+            });
+        };
+        LocalStore.prototype.setUpDb = function (database) {
+            if (!database.objectStoreNames.contains("workspaceLayouts")) {
+                database.createObjectStore("workspaceLayouts");
+            }
+            if (!database.objectStoreNames.contains("globalLayouts")) {
+                database.createObjectStore("globalLayouts");
+            }
+        };
+        return LocalStore;
+    }());
+
+    var JSONStore = (function () {
+        function JSONStore(storeBaseUrl) {
+            this.storeBaseUrl = storeBaseUrl;
+        }
+        JSONStore.prototype.getAll = function (layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var fetchUrl, response, layouts, error_1, layoutProp, layoutsToVerify;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            layoutTypeDecoder.runWithException(layoutType);
+                            fetchUrl = this.storeBaseUrl + "/" + defaultLayoutsName;
+                            return [4, this.fetchTimeout(fetchUrl)];
+                        case 1:
+                            response = _a.sent();
+                            if (!response.ok) {
+                                return [2, []];
+                            }
+                            _a.label = 2;
+                        case 2:
+                            _a.trys.push([2, 4, , 5]);
+                            return [4, response.json()];
+                        case 3:
+                            layouts = _a.sent();
+                            return [3, 5];
+                        case 4:
+                            error_1 = _a.sent();
+                            return [2, []];
+                        case 5:
+                            if (!layouts) {
+                                return [2, []];
+                            }
+                            layoutProp = layoutType === "Global" ? "globals" : "workspaces";
+                            layoutsToVerify = (layouts[layoutProp] || []);
+                            return [2, layoutsToVerify.filter(function (layout) {
+                                    var decodeResult = layoutDecoder.run(layout);
+                                    if (!decodeResult.ok) {
+                                        console.warn("Fetched layout: " + layout.name + " is discarded, because it failed the validation: " + JSON.stringify(decodeResult));
+                                    }
+                                    return decodeResult.ok;
+                                })];
+                    }
+                });
+            });
+        };
+        JSONStore.prototype.get = function (name, layoutType) {
+            return __awaiter$2(this, void 0, void 0, function () {
+                var allLayouts;
+                return __generator$2(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4, this.getAll(layoutType)];
+                        case 1:
+                            allLayouts = _a.sent();
+                            return [2, allLayouts.find(function (layout) { return layout.name === name; })];
+                    }
+                });
+            });
+        };
+        JSONStore.prototype.fetchTimeout = function (url, timeoutMilliseconds) {
+            if (timeoutMilliseconds === void 0) { timeoutMilliseconds = 1000; }
+            return new Promise(function (resolve, reject) {
+                var timeoutHit = false;
+                var timeout = setTimeout(function () {
+                    timeoutHit = true;
+                    reject(new Error("Fetch request for: " + url + " timed out at: " + timeoutMilliseconds + " milliseconds"));
+                }, timeoutMilliseconds);
+                fetch(url)
+                    .then(function (response) {
+                    if (!timeoutHit) {
+                        clearTimeout(timeout);
+                        resolve(response);
+                    }
+                })
+                    .catch(function (err) {
+                    if (!timeoutHit) {
+                        clearTimeout(timeout);
+                        reject(err);
+                    }
+                });
+            });
+        };
+        return JSONStore;
+    }());
+
+    var AutoStorage = (function () {
+        function AutoStorage() {
+        }
+        AutoStorage.prototype.get = function (name, type) {
+            var obj = this.getObjectFromLocalStorage();
+            var key = this.getKey(name, type);
+            return obj[key];
+        };
+        AutoStorage.prototype.save = function (layout) {
+            var obj = this.getObjectFromLocalStorage();
+            var key = this.getKey(layout.name, layout.type);
+            obj[key] = layout;
+            this.setObjectToLocalStorage(obj);
+            return layout;
+        };
+        AutoStorage.prototype.remove = function (name, type) {
+            var obj = this.getObjectFromLocalStorage();
+            var key = this.getKey(name, type);
+            delete obj[key];
+        };
+        AutoStorage.prototype.getObjectFromLocalStorage = function () {
+            var values = window.localStorage.getItem(AutoStorage.KEY);
+            if (values) {
+                return JSON.parse(values);
+            }
+            return {};
+        };
+        AutoStorage.prototype.setObjectToLocalStorage = function (obj) {
+            window.localStorage.setItem(AutoStorage.KEY, JSON.stringify(obj));
+        };
+        AutoStorage.prototype.getKey = function (name, type) {
+            return type + "_" + name;
+        };
+        AutoStorage.KEY = "G0_layouts";
+        return AutoStorage;
+    }());
 
     var promisePlus = function (promise, timeoutMilliseconds, timeoutMessage) {
         return new Promise(function (resolve, reject) {
@@ -19804,10 +20606,10 @@
         });
     };
 
-    var hookCloseEvents = function (api, config, control) {
+    var hookCloseEvents = function (api, config, control, layoutsController) {
         var done = false;
         var doneFn = function () { return __awaiter$2(void 0, void 0, void 0, function () {
-            var shouldSave, allChildren, firstChild, layoutName, layouts, command;
+            var shouldSave, allChildren, firstChild, layoutName, command;
             var _a;
             return __generator$2(this, function (_b) {
                 if (!done) {
@@ -19818,7 +20620,6 @@
                         firstChild = allChildren[0];
                         layoutName = "_auto_" + document.location.href;
                         if (allChildren.length > 0) {
-                            layouts = api.layouts;
                             command = {
                                 domain: "layouts",
                                 command: "saveLayoutAndClose",
@@ -19828,13 +20629,13 @@
                                     layoutName: layoutName,
                                     context: {},
                                     metadata: {},
-                                    parentInfo: layouts.getLocalLayoutComponent({}, true)
+                                    parentInfo: layoutsController === null || layoutsController === void 0 ? void 0 : layoutsController.getLocalLayoutComponent({}, true)
                                 }
                             };
                             control.send(command, { windowId: firstChild });
                         }
                         else {
-                            api.layouts.save({ name: layoutName });
+                            layoutsController === null || layoutsController === void 0 ? void 0 : layoutsController.autoSave({ name: layoutName });
                         }
                     }
                     api.done();
@@ -19848,7 +20649,7 @@
     };
     var createFactoryFunction = function (coreFactoryFunction) {
         return function (config) { return __awaiter$2(void 0, void 0, void 0, function () {
-            var builtCoreConfig, isWebEnvironment, shouldInitializeChannels, shouldInitializeAppManager, gdWindowContext, control, windows, ext, channelsLib, appManagerLib, coreConfig, core;
+            var builtCoreConfig, isWebEnvironment, shouldInitializeChannels, shouldInitializeAppManager, gdWindowContext, control, windows, layouts, layoutsController, ext, channelsLib, appManagerLib, coreConfig, core;
             var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
             return __generator$2(this, function (_r) {
                 switch (_r.label) {
@@ -19865,6 +20666,7 @@
                                         windows: true,
                                         logger: (_c = builtCoreConfig.glue) === null || _c === void 0 ? void 0 : _c.logger,
                                         channels: shouldInitializeChannels,
+                                        layouts: true,
                                         appManager: shouldInitializeAppManager
                                     })];
                             }
@@ -19895,7 +20697,20 @@
                                 }
                             }, {
                                 name: "layouts",
-                                create: function (coreLib) { return new Layouts(windows, coreLib.interop, coreLib.logger.subLogger("layouts"), control, builtCoreConfig.glue); }
+                                create: function (coreLib) {
+                                    var _a, _b;
+                                    var remoteStore;
+                                    if (((_a = builtCoreConfig.layouts) === null || _a === void 0 ? void 0 : _a.remoteType) === "json") {
+                                        var baseLocation = ((_b = builtCoreConfig === null || builtCoreConfig === void 0 ? void 0 : builtCoreConfig.glue.assets) === null || _b === void 0 ? void 0 : _b.location) || defaultAssetsBaseLocation;
+                                        remoteStore = new JSONStore(baseLocation);
+                                    }
+                                    var localStore = new LocalStore();
+                                    var autoStore = new AutoStorage();
+                                    var layoutsStorage = new LayoutStorage(localStore, autoStore, remoteStore);
+                                    layoutsController = new LayoutsController(layoutsStorage, windows, control, coreLib.interop, builtCoreConfig === null || builtCoreConfig === void 0 ? void 0 : builtCoreConfig.glue);
+                                    layouts = new Layouts(layoutsController);
+                                    return layouts;
+                                }
                             });
                             if (shouldInitializeAppManager) {
                                 appManagerLib = {
@@ -19919,21 +20734,27 @@
                         return [4, promisePlus(function () { return coreFactoryFunction(coreConfig, ext); }, 10000, "Glue Web initialization timed out")];
                     case 2:
                         core = _r.sent();
-                        control.start(core.interop, core.logger.subLogger("control"));
-                        if (!isWebEnvironment) return [3, 7];
-                        return [4, initStartupContext(core.windows.my(), core.interop, (_m = core.appManager) === null || _m === void 0 ? void 0 : _m.myInstance)];
+                        if (!(config === null || config === void 0 ? void 0 : config.libraries)) return [3, 4];
+                        return [4, Promise.all(config.libraries.map(function (lib) { return lib(core, builtCoreConfig === null || builtCoreConfig === void 0 ? void 0 : builtCoreConfig.glue); }))];
                     case 3:
                         _r.sent();
-                        if (!((_p = (_o = builtCoreConfig.glue) === null || _o === void 0 ? void 0 : _o.layouts) === null || _p === void 0 ? void 0 : _p.autoRestore)) return [3, 5];
-                        return [4, restoreAutoSavedLayout(core)];
+                        _r.label = 4;
                     case 4:
+                        control.start(core.interop, core.logger.subLogger("control"));
+                        if (!isWebEnvironment) return [3, 9];
+                        return [4, initStartupContext(core.windows.my(), core.interop, (_m = core.appManager) === null || _m === void 0 ? void 0 : _m.myInstance)];
+                    case 5:
                         _r.sent();
-                        _r.label = 5;
-                    case 5: return [4, hookCloseEvents(core, (_q = builtCoreConfig.glue) !== null && _q !== void 0 ? _q : {}, control)];
+                        if (!((_p = (_o = builtCoreConfig.glue) === null || _o === void 0 ? void 0 : _o.layouts) === null || _p === void 0 ? void 0 : _p.autoRestore)) return [3, 7];
+                        return [4, (layoutsController === null || layoutsController === void 0 ? void 0 : layoutsController.restoreAutoSavedLayout())];
                     case 6:
                         _r.sent();
                         _r.label = 7;
-                    case 7: return [2, core];
+                    case 7: return [4, hookCloseEvents(core, (_q = builtCoreConfig.glue) !== null && _q !== void 0 ? _q : {}, control, layoutsController)];
+                    case 8:
+                        _r.sent();
+                        _r.label = 9;
+                    case 9: return [2, core];
                 }
             });
         }); };
@@ -20944,6 +21765,10 @@
         Utils.isNode = function () {
             if (typeof Utils._isNode !== "undefined") {
                 return Utils._isNode;
+            }
+            if (typeof window !== "undefined") {
+                Utils._isNode = false;
+                return false;
             }
             try {
                 Utils._isNode = Object.prototype.toString.call(global.process) === "[object process]";
@@ -22409,7 +23234,7 @@
         }
     };
 
-    var version$2$1 = "5.0.6";
+    var version$2$1 = "5.0.7";
 
     function prepareConfig$2 (configuration, ext, glue42gd) {
         var _a, _b, _c, _d;
@@ -25972,9 +26797,10 @@
     glueWebFactory.default = glueWebFactory;
     glueWebFactory.version = version$3;
 
-    var version$4 = "0.0.0";
+    var version$4 = "1.0.1";
 
     const defaultGlueConfig = {
+        application: window.myFDC3AppName,
         appManager: true,
         context: true,
         intents: true,

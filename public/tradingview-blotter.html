@@ -35,6 +35,26 @@
         #blotter-container .tradingview-widget-container {
             padding: 3px;
         }
+
+        #contextMenu {
+            visibility: hidden;
+            opacity: 0;
+            position: fixed;
+            background: #fff;
+            color: #555;
+            font-family: sans-serif;
+            font-size: 11px;
+            -webkit-transition: opacity .5s ease-in-out;
+            -moz-transition: opacity .5s ease-in-out;
+            -ms-transition: opacity .5s ease-in-out;
+            -o-transition: opacity .5s ease-in-out;
+            transition: opacity .5s ease-in-out;
+            -webkit-box-shadow: 2px 2px 2px 0px rgba(143, 144, 145, 1);
+            -moz-box-shadow: 2px 2px 2px 0px rgba(143, 144, 145, 1);
+            box-shadow: 2px 2px 2px 0px rgba(143, 144, 145, 1);
+            padding: 0px;
+            border: 1px solid #C6C6C6;
+        }
     </style>
     <script src="/scripts/util.js"></script>
     <!-- TODO (optional): Reference the manifest you want to use here: -->
@@ -44,15 +64,17 @@
         // TODO (optional): Register the service worker you want to use here:
         // e.g.
         // if ("serviceWorker" in navigator) {
-        //     navigator.serviceWorker.register('./tradingview-blotter/sw.js');
+        //     navigator.serviceWorker.register("./tradingview-blotter/sw.js");
         // }
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("./service-worker.js");
         }
     </script>
     <!-- TODO (optional): Reference your FDC3 implementation here. Skip this if your implementation is auto injected by the container or by a browser extension. -->
+    <script>
+        window.myFDC3AppName = "TradingView Blotter";
+    </script>
     <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
-
     <!-- TODO (optional): Reference any other scripts/styles you might need here (e.g. for a channel selector widget). -->
     <link rel="stylesheet" href="./styles/glue42-core-channel-selector.css">
     <link rel="stylesheet" href="./styles/jquery-ui.min.css">
@@ -106,6 +128,7 @@
         </div>
         <!-- TradingView Widget END -->
 
+        <div id="contextMenu"></div>
         <div id="blotter-container"></div>
     </section>
 </body>
@@ -121,12 +144,74 @@
         script.innerHTML = `{
   "symbol": "${ticker}",
   "width": 350,
+  "height": 126,
   "colorTheme": "dark",
   "isTransparent": false,
   "locale": "en"
 }`;
         const target = wrapper.querySelector(".tradingview-widget-container__widget");
         target.appendChild(script);
+
+        const menuElement = document.getElementById("contextMenu");
+        const menuElementStyle = menuElement.style;
+
+        const clearMenu = () => {
+            menuElement.innerHTML = "";
+            menuElementStyle.opacity = "0";
+            menuElementStyle.visibility = "hidden";
+        };
+
+        const displayMenu = (x, y) => {
+            menuElementStyle.top = y + "px";
+            menuElementStyle.left = x + "px";
+            menuElementStyle.visibility = "visible";
+            menuElementStyle.opacity = "1";
+        };
+
+        target.style.display = "flex";
+        const contextMenu = document.createElement("div");
+        contextMenu.style.position = "absolute";
+        contextMenu.style.width = "350px";
+        contextMenu.style.height = "126px";
+        contextMenu.style.opacity = 1;
+        contextMenu.addEventListener("contextmenu", async (event) => {
+            event.preventDefault();
+            const isVisible = menuElement.style.visibility === "visible";
+
+            const posX = event.clientX;
+            const posY = event.clientY;
+
+            displayMenu(posX, posY);
+
+            if (!isVisible) {
+                const contextType = "fdc3.instrument";
+                const intentsWithApps = await fdc3.findIntentsByContext({ type: contextType });
+                intentsWithApps.forEach((intentWithApps) => {
+                    intentWithApps.apps.forEach((app) => {
+                        const intentName = intentWithApps.intent.name;
+                        const appName = app.name;
+
+                        const context = {
+                            type: contextType,
+                            id: { ticker }
+                        };
+
+                        const itemElement = document.createElement("button");
+
+                        itemElement.innerText = `${intentName} - ${appName}`;
+                        itemElement.onclick = () => {
+                            fdc3.raiseIntent(intentName, context, appName);
+                        };
+                        menuElement.appendChild(itemElement);
+                    });
+                });
+
+                document.addEventListener("click", () => {
+                    clearMenu();
+                }, false);
+            }
+        }, false);
+        target.appendChild(contextMenu);
     };
 
     document.addEventListener("DOMContentLoaded", () => {

@@ -6,6 +6,9 @@
     "webpack-cli": "^3.3.10"
   },
   "license": "Apache-2.0",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "express": "^4.17.1"
   }

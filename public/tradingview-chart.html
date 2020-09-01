@@ -34,13 +34,16 @@
         // TODO (optional): Register the service worker you want to use here:
         // e.g.
         // if ("serviceWorker" in navigator) {
-        //     navigator.serviceWorker.register('./tradingview-chart/sw.js');
+        //     navigator.serviceWorker.register("./tradingview-chart/sw.js");
         // }
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker.register("./service-worker.js");
         }
     </script>
     <!-- TODO (optional): Reference your FDC3 implementation here. Skip this if your implementation is auto injected by the container or by a browser extension. -->
+    <script>
+        window.myFDC3AppName = "TradingView Chart";
+    </script>
     <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
     <!-- TODO (optional): Reference any other scripts/styles you might need here (e.g. for a channel selector widget). -->
     <link rel="stylesheet" href="./styles/glue42-core-channel-selector.css">
