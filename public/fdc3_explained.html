@@ -1,0 +1,244 @@
+<html>
+
+<head>
+  <title>
+    FDC3 Explained
+  </title>
+  <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
+  <link rel="stylesheet" href="./styles/jquery-ui.min.css">
+  <script type="text/javascript" src="./scripts/jquery-1.12.4.min.js"></script>
+  <script src="./scripts/jquery-ui.min.js"></script>
+  <script src="./scripts/glue42-core-channel-selector.js"></script>
+
+  <script language="javascript">
+
+    // < !--Various global stuff-- >
+    const channelArray = [];
+
+    // < !--Check if FDC3 is avaialable-- >
+    function fdc3Init(callback) {
+      let fdc3Tries = 10; //lets not check forever...
+      const onFDC3Ready = () => {
+        if (window.fdc3) {
+          callback.call(this);
+        }
+        else {
+          if (fdc3Tries > 0) {
+            fdc3Tries--;
+            window.setTimeout(onFDC3Ready, 100);
+          }
+        }
+      };
+      onFDC3Ready();
+    }
+
+    // < !--Enable application when FDC3 is available-- >
+    document.addEventListener("DOMContentLoaded", () => {
+
+      fdc3Init(async () => {
+
+        const systemChannels = await fdc3.getSystemChannels();
+
+        systemChannels.forEach(channel => {
+          const thisChannel = channel;
+          channelArray.push(channel.id);
+          //alert(channel.id);
+          //createChannelRow(channel);
+          //listeners[channel.id] = channel.addContextListener((context) => {updateChannelRow(thisChannel, context);});
+        });
+        //populateChannels(channelArray);
+        enablePage();
+      });
+    });
+
+    function enablePage() {
+      console.log('FDC3 is available');
+
+      // < !--Special case for Openfin to read App Name-- >
+      if (window.fin) {
+        fin.desktop.Application.getCurrent().getInfo((info) => {
+          document.getElementById('providerDetails').innerHTML =
+            'Available - ' + info.manifest.startup_app.name
+        })
+      } else {
+        document.getElementById('providerDetails').innerHTML = 'Available - Not specified';
+      }
+      document.getElementById('directoryDetails').innerHTML = 'TBD';
+
+      // < !--enable page obects-- >
+      document.getElementById('btnBroadcast').disabled = false;
+      document.getElementById('txtBroadcastData').disabled = false;
+      document.getElementById('selBroadcastChannel').disabled = false;
+      document.getElementById('btnFetchChannels').disabled = false;
+      document.getElementById('txtAvailableChannels').disabled = false;
+
+    }
+
+    // < !--Various poor examples of FDC3 functionality-- >
+
+    function populateChannels(channelArray) {
+      const selChannel = document.getElementById('selBroadcastChannel');
+      const txtChannels = document.getElementById('txtAvailableChannels');
+
+      txtChannels.value = channelArray;
+
+      for (let i = 0; i < channelArray.length; i++) {
+        const selOption = document.createElement("option");
+        selOption.text = channelArray[i];
+        selChannel.add(selOption);
+      }
+    }
+
+    async function broadcastFDC3Context() {
+      const selectedOption = document.getElementById('selBroadcastChannel').selectedOptions[0];
+      let selectedChannelId;
+      if (typeof selectedOption !== 'undefined') {
+        selectedChannelId = selectedOption.innerText;
+      }
+
+      const myContextData = document.getElementById('txtBroadcastData');
+      const ctx = JSON.parse(myContextData.value);
+
+      if (selectedChannelId) {
+        const fdc3SystemChannels = await fdc3.getSystemChannels();
+        const selectedChannel = fdc3SystemChannels.find((fdc3SystemChannel) => fdc3SystemChannel.id === selectedChannelId);
+
+        selectedChannel.broadcast(ctx);
+      } else {
+        fdc3.broadcast(ctx);
+      }
+
+      document.getElementById('selBroadcastChannel').selectedIndex = 0;
+    }
+
+    function appLoader() {
+      const myUrl = document.getElementById('appUrl').value;
+      if (myUrl.length > 0) {
+        window.open(myUrl);
+      }
+    }
+
+  </script>
+
+  <style>
+    textarea {
+      width: 400px;
+      height: 100px;
+    }
+
+    select {
+      width: 238px;
+      height: 24px;
+    }
+
+    .ctxInput {
+      width: 241px;
+      height: 24px;
+    }
+
+    .urlInput {
+      width: 400px;
+      height: 24px;
+    }
+
+    .header {
+      width: 200px;
+      height: 40px;
+      font-weight: 700;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <header>
+    <select id="channel-selector-widget"></select>
+  </header>
+  <table border="1">
+
+    <tr>
+      <td class="header">FDC3 Provider Service:</td>
+      <td><span id="providerDetails">FDC3 Not Available</span></td>
+    </tr>
+
+    <tr>
+      <td colspan="3">
+        <hr>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="header">App Directory:</td>
+      <td><span id="directoryDetails">No Application Directory Connected</span></td>
+      <td><input type="button" value="Connect" disabled></td>
+    </tr>
+
+    <tr>
+      <td class="header">Available Apps:</td>
+      <td><textarea disabled></textarea></td>
+      <td><input type="button" value="Fetch" disabled></td>
+    </tr>
+
+    <tr>
+      <td class="header">Load App Start Url:</td>
+      <td><input type="text" id="appUrl" class="urlInput" value="demoapps/receive.html"></td>
+      <td><input type="button" value="Open" onClick="appLoader();"></td>
+    </tr>
+
+    <tr>
+      <td colspan="3">
+        <hr>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="header">Available Channels:</td>
+      <td><textarea disabled id="txtAvailableChannels"></textarea></td>
+      <td><input type="button" value="Fetch" id="btnFetchChannels" disabled
+          onClick="populateChannels(channelArray);">&nbsp;<input type="button" value="Add" disabled></td>
+    </tr>
+
+    <tr>
+      <td colspan="3">
+        <hr>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="header" rowspan="2">Broadcast Context:</td>
+      <td>Channel: <select id="selBroadcastChannel" disabled></select></td>
+      <td rowspan="2"><input type="button" value="Send" id="btnBroadcast" disabled onClick="broadcastFDC3Context();">
+      </td>
+    </tr>
+
+    <tr>
+      <td><textarea id="txtBroadcastData" disabled>{"id":{"ISIN":"US0378331005","SEDOL":"2046251","ticker":"AAPL"},"name":"Apple Inc.","type":"fdc3.instrument"}
+</textarea></td>
+    </tr>
+
+    <tr>
+      <td colspan="3">
+        <hr>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="header" rowspan="3">Get Context:</td>
+      <td>Channel: <select disabled></td>
+      <td rowspan="3"><input type="button" value="Fetch" disabled></td>
+    </tr>
+
+    <tr>
+      <td>Context: <input type="text" class="ctxInput" disabled></td>
+    </tr>
+
+    <tr>
+      <td><textarea disabled></textarea></td>
+    </tr>
+
+  </table>
+
+</body>
+
+</html>

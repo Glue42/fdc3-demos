@@ -74,7 +74,7 @@
     "appManager": {
         "remoteSources": [
             {
-                "url": "http://localhost:3002/v1/apps/search",
+                "url": "./v1/apps/search",
                 "pollingInterval": 1000
             }
         ]

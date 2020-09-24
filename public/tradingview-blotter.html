@@ -22,10 +22,6 @@
             padding-left: .5rem;
         }
 
-        .tradingview-widget-container {
-            flex-grow: 1;
-        }
-
         #blotter-container {
             display: flex;
             flex-flow: wrap;
@@ -60,7 +56,7 @@
             z-index: 100;
         }
 
-        #contextMenu button {
+        #contextMenu>* {
             width: 100%;
             padding: 0.375rem 1.5rem;
             clear: both;
@@ -71,12 +67,11 @@
             background-color: transparent;
             border: 0;
         }
-        
+
         #contextMenu button:hover {
             color: white;
             background-color: rgba(255, 255, 255, 0.05);
         }
-        
     </style>
     <script src="/scripts/util.js"></script>
     <!-- TODO (optional): Reference the manifest you want to use here: -->
@@ -94,7 +89,7 @@
     </script>
     <!-- TODO (optional): Reference your FDC3 implementation here. Skip this if your implementation is auto injected by the container or by a browser extension. -->
     <script>
-        window.myFDC3AppName = "TradingView Blotter";
+        window.fdc3AppName = "TradingView Blotter";
     </script>
     <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
     <!-- TODO (optional): Reference any other scripts/styles you might need here (e.g. for a channel selector widget). -->
@@ -155,11 +150,19 @@
     </section>
 </body>
 <script>
-    const makeTicker = (context) => {
+    const tickers = [];
+
+    const makeTicker = (ticker) => {
+        if (tickers.includes(ticker)) {
+            alert(`Ticker ${ticker} already listed.`);
+
+            return;
+        }
+        tickers.push(ticker);
+
         const wrapper = document.createElement("div");
-        const ticker = context.id.ticker;
         wrapper.className = "tradingview-widget-container";
-        wrapper.innerHTML = `<div class="tradingview-widget-container__widget"></div></div>`;
+        wrapper.innerHTML = "<div class=\"tradingview-widget-container__widget\"></div>";
         document.getElementById("blotter-container").appendChild(wrapper);
         const script = document.createElement("script");
         script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
@@ -196,6 +199,8 @@
         contextMenu.style.width = "350px";
         contextMenu.style.height = "126px";
         contextMenu.style.opacity = 1;
+        contextMenu.style.cursor = "pointer";
+
         contextMenu.addEventListener("contextmenu", async (event) => {
             event.preventDefault();
             const isVisible = menuElement.style.visibility === "visible";
@@ -208,31 +213,47 @@
             if (!isVisible) {
                 const contextType = "fdc3.instrument";
                 const intentsWithApps = await fdc3.findIntentsByContext({ type: contextType });
-                intentsWithApps.forEach((intentWithApps) => {
-                    intentWithApps.apps.forEach((app) => {
-                        const intentName = intentWithApps.intent.name;
-                        const appName = app.name;
 
-                        const context = {
-                            type: contextType,
-                            id: { ticker }
-                        };
+                if (intentsWithApps.length === 0) {
+                    const itemElement = document.createElement("div");
 
-                        const itemElement = document.createElement("button");
+                    itemElement.innerText = `No intents for context type ${contextType} found`;
+                    itemElement.onclick = () => {
+                        fdc3.raiseIntent(intentName, context, appName);
+                    };
+                    menuElement.appendChild(itemElement);
+                } else {
+                    intentsWithApps.forEach((intentWithApps) => {
+                        intentWithApps.apps.forEach((app) => {
+                            const intentName = intentWithApps.intent.name;
+                            const appName = app.name;
 
-                        itemElement.innerText = `${intentName} - ${appName}`;
-                        itemElement.onclick = () => {
-                            fdc3.raiseIntent(intentName, context, appName);
-                        };
-                        menuElement.appendChild(itemElement);
+                            const context = {
+                                type: contextType,
+                                id: { ticker }
+                            };
+
+                            const itemElement = document.createElement("button");
+
+                            itemElement.innerText = `${intentName} - ${appName}`;
+                            itemElement.onclick = () => {
+                                fdc3.raiseIntent(intentName, context, appName);
+                            };
+                            menuElement.appendChild(itemElement);
+                        });
                     });
-                });
+                }
 
                 document.addEventListener("click", () => {
                     clearMenu();
                 }, false);
             }
         }, false);
+
+        contextMenu.addEventListener("click", (event) => {
+            window.open(`https://www.tradingview.com/symbols/${ticker}/?utm_campaign=single-quote&amp;utm_medium=widget&amp;utm_source=localhost`);
+        });
+
         target.appendChild(contextMenu);
     };
 
@@ -240,7 +261,7 @@
         fdc3Init(() => {
             fdc3.addContextListener(ctx => {
                 if (ctx.type === "fdc3.instrument" && typeof ctx.id.ticker !== "undefined") {
-                    makeTicker(ctx);
+                    makeTicker(ctx.id.ticker);
                 }
             });
         });

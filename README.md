@@ -20,5 +20,7 @@ If you do not run the demo inside of a container that has a channel selector wid
 ## Steps to run
 
 1. `npm i`
-2. `node index.js`
-3. Navigate to `http://localhost:3001/`. You should see both applications side by side
+2. Inside of index.js comment out the manifests that reference the deployed versions of the applications and use the localhost ones instead
+3. `node index.js`
+4. Navigate to `http://localhost:3001/`. You should see the blotter and chart applications side by side
+5. Navigate to `http://localhost:3001/fdc3_explained.html` and `http://localhost:3001/fdc3_receive.html`

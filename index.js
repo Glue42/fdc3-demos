@@ -4,6 +4,33 @@ const generators = require('./generators');
 const config = require('./config');
 const demos = require("./demos.json");
 
+const tradingViewBlotter = {
+  name: "TradingView Blotter",
+  appId: "tradingview-blotter",
+  manifestType: "Glue42",
+  manifest: "{\"details\":{\"url\":\"http://fdc3-demo.glue42.com/tradingview-blotter.html\"}}",
+  // manifest: "{\"details\":{\"url\":\"http://localhost:3001/tradingview-blotter.html\"}}",
+};
+const tradingViewChart = {
+  name: "TradingView Chart",
+  appId: "tradingview-chart",
+  manifestType: "fdc3.glue42-core.demo",
+  manifest: "{\"url\":\"http://fdc3-demo.glue42.com/tradingview-chart.html\"}",
+  // manifest: "{\"url\":\"http://localhost:3001/tradingview-chart.html\"}",
+  intents: [
+    {
+      name: "fdc3.ViewChart",
+      contexts: [
+        "fdc3.instrument"
+      ]
+    }
+  ]
+};
+const applications = [
+  tradingViewBlotter,
+  tradingViewChart
+];
+
 const app = express();
 
 //public route
@@ -73,6 +100,13 @@ app.get('/manifests/web/:demo', function (req, res) {
   });
 
   res.status(200).json(generators.web.generate(data, req));
+});
+
+app.get("/v1/apps/search", (_, res) => {
+  res.json({
+    applications,
+    message: 'OK'
+  });
 });
 
 app.listen(config.port, () => {
