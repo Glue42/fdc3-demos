@@ -1,0 +1,294 @@
+[
+    {
+        "title": "FDC3 TradingView Chart (prod)",
+        "type": "window",
+        "name": "fdc3-tradingview-chart-prod",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "https://fdc3-demo.glue42.com/tradingview-chart.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "intents": [
+            {
+                "name": "fdc3.ViewChart",
+                "contexts": [
+                    "fdc3.instrument"
+                ]
+            }
+        ],
+        "customProperties": {
+            "folder": "FDC3 Prod"
+        }
+    },
+    {
+        "title": "FDC3 TradingView Blotter (prod)",
+        "type": "window",
+        "name": "fdc3-tradingview-blotter-prod",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "https://fdc3-demo.glue42.com/tradingview-blotter.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Prod"
+        }
+    },
+    {
+        "title": "FDC3 Explained (prod)",
+        "type": "window",
+        "name": "fdc3-explained-prod",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "https://fdc3-demo.glue42.com/fdc3_explained.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Prod"
+        }
+    },
+    {
+        "title": "FDC3 Receive (prod)",
+        "type": "window",
+        "name": "fdc3-receive-prod",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "https://fdc3-demo.glue42.com/fdc3_receive.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Prod"
+        }
+    },
+    {
+        "title": "FDC3 Glue42 (prod)",
+        "type": "window",
+        "name": "fdc3-glue42-prod",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "https://fdc3-demo.glue42.com/glue42-core-demo.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Prod"
+        }
+    },
+    {
+        "title": "FDC3 TradingView Chart (dev)",
+        "type": "window",
+        "name": "fdc3-tradingview-chart-dev",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "http://84.238.183.242:3001/tradingview-chart.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "intents": [
+            {
+                "name": "fdc3.ViewChart",
+                "contexts": [
+                    "fdc3.instrument"
+                ]
+            }
+        ],
+        "customProperties": {
+            "folder": "FDC3 Dev"
+        }
+    },
+    {
+        "title": "FDC3 TradingView Blotter (dev)",
+        "type": "window",
+        "name": "fdc3-tradingview-blotter-dev",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "http://84.238.183.242:3001/tradingview-blotter.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Dev"
+        }
+    },
+    {
+        "title": "FDC3 Explained (dev)",
+        "type": "window",
+        "name": "fdc3-explained-dev",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "http://84.238.183.242:3001/fdc3_explained.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Dev"
+        }
+    },
+    {
+        "title": "FDC3 Receive (dev)",
+        "type": "window",
+        "name": "fdc3-receive-dev",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "http://84.238.183.242:3001/fdc3_receive.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Dev"
+        }
+    },
+    {
+        "title": "FDC3 Glue42 (dev)",
+        "type": "window",
+        "name": "fdc3-glue42-dev",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "http://84.238.183.242:3001/glue42-core-demo.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Dev"
+        }
+    },
+    {
+        "title": "FDC3 TradingView Chart (orig)",
+        "type": "window",
+        "name": "fdc3-tradingview-chart-orig",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "https://appd.kolbito.com/demos/tradingview-chart/index.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Orig"
+        }
+    },
+    {
+        "title": "FDC3 TradingView Blotter (orig)",
+        "type": "window",
+        "name": "fdc3-tradingview-blotter-orig",
+        "icon": "http://localhost:22080/resources/icons/fdc3.png",
+        "hidden": false,
+        "details": {
+            "url": "https://appd.kolbito.com/demos/tradingview-blotter/index.html",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            }
+        },
+        "customProperties": {
+            "folder": "FDC3 Orig"
+        }
+    }
+]
