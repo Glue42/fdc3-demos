@@ -212,17 +212,10 @@
 
             if (!isVisible) {
                 const contextType = "fdc3.instrument";
-                const intentsWithApps = await fdc3.findIntentsByContext({ type: contextType });
 
-                if (intentsWithApps.length === 0) {
-                    const itemElement = document.createElement("div");
+                try {
+                    const intentsWithApps = await fdc3.findIntentsByContext({ type: contextType });
 
-                    itemElement.innerText = `No intents for context type ${contextType} found`;
-                    itemElement.onclick = () => {
-                        fdc3.raiseIntent(intentName, context, appName);
-                    };
-                    menuElement.appendChild(itemElement);
-                } else {
                     intentsWithApps.forEach((intentWithApps) => {
                         intentWithApps.apps.forEach((app) => {
                             const intentName = intentWithApps.intent.name;
@@ -242,6 +235,14 @@
                             menuElement.appendChild(itemElement);
                         });
                     });
+                } catch (error) { // Handle the case where no intents are found.
+                    const itemElement = document.createElement("div");
+
+                    itemElement.innerText = `No intents for context type ${contextType} found`;
+                    itemElement.onclick = () => {
+                        fdc3.raiseIntent(intentName, context, appName);
+                    };
+                    menuElement.appendChild(itemElement);
                 }
 
                 document.addEventListener("click", () => {

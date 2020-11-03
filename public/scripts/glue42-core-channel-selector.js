@@ -137,6 +137,16 @@ window.createChannelSelectorWidget = (
 };
 
 (async () => {
+  // Hide the channel selector widget when running inside of an Electron container.
+  const isGlue42Enterprise = navigator.userAgent.toLowerCase().includes(" electron/");
+  if (isGlue42Enterprise) {
+    $(document).ready(() => {
+      $("#channel-selector-widget").parent().css("display", "none");
+    });
+
+    return;
+  }
+
   // The value that will be displayed inside the channel selector widget to leave the current channel.
   const NO_CHANNEL_VALUE = "No channel";
 
