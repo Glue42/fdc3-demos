@@ -26,9 +26,33 @@ const tradingViewChart = {
     }
   ]
 };
+const fdc3Explained = {
+  name: "FDC3 Explained",
+  appId: "fdc3-explained",
+  manifestType: "fdc3.glue42-core.demo",
+  manifest: "{\"url\":\"https://fdc3-demo.glue42.com/fdc3_explained\"}",
+  // manifest: "{\"url\":\"http://localhost:3001/fdc3_explained\"}"
+};
+const fdc3Receive = {
+  name: "FDC3 Receive",
+  appId: "fdc3-receive",
+  manifestType: "fdc3.glue42-core.demo",
+  manifest: "{\"url\":\"https://fdc3-demo.glue42.com/fdc3_receive.html\"}",
+  // manifest: "{\"url\":\"http://localhost:3001/fdc3_receive.html\"}"
+};
+const glue42CoreDemo = {
+  name: "Glue42 Core Demo",
+  details: {
+    url: "https://fdc3-demo.glue42.com/glue42-core-demo.html",
+    // url: "http://localhost:3001/glue42-core-demo.html",
+  }
+};
 const applications = [
   tradingViewBlotter,
-  tradingViewChart
+  tradingViewChart,
+  fdc3Explained,
+  fdc3Receive,
+  glue42CoreDemo
 ];
 
 const app = express();

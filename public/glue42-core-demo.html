@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glue42 Core Demo</title>
+  <script type="text/javascript" src="./scripts/web.umd.js"></script>
+</head>
+
+<body>
+  <h1>A Glue42 Core application that only uses our JS SDK (@glue42/web)</h1>
+  <script>
+    ((async () => {
+      const glueWebConfig = {
+        application: 'Glue42 Core Demo',
+        appManager: true
+      };
+      window.glue = await GlueWeb(glueWebConfig);
+      // glue.intents.raise({
+      //   intent: 'fdc3.ViewChart',
+      //   context: { id: { ticker: 'LMND' } },
+      //   target: 'reuse'
+      // });
+      // glue.intents.addIntentListener(
+      //   {
+      //     intent: "newlyAddedGlue42CoreIntent",
+      //     contextTypes: ["fdc3.instrument"]
+      //   },
+      //   ({ id: { ticker } }) => {
+      //     const newDiv = document.createElement('h4');
+      //     newDiv.innerText = ticker;
+      //     document.body.appendChild(newDiv);
+      //   }
+      // );
+    })())
+  </script>
+</body>
+
+</html>
