@@ -16,7 +16,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "intents": [
             {
@@ -47,7 +48,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Prod"
@@ -70,7 +72,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Prod"
@@ -93,7 +96,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Prod"
@@ -116,7 +120,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Prod"
@@ -129,7 +134,7 @@
         "icon": "http://localhost:22080/resources/icons/fdc3.png",
         "hidden": false,
         "details": {
-            "url": "http://84.238.183.242:3001/tradingview-chart.html",
+            "url": "http://84.238.169.194:3001/tradingview-chart.html",
             "height": 640,
             "width": 560,
             "left": 100,
@@ -139,7 +144,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "intents": [
             {
@@ -160,7 +166,7 @@
         "icon": "http://localhost:22080/resources/icons/fdc3.png",
         "hidden": false,
         "details": {
-            "url": "http://84.238.183.242:3001/tradingview-blotter.html",
+            "url": "http://84.238.169.194:3001/tradingview-blotter.html",
             "height": 640,
             "width": 560,
             "left": 100,
@@ -170,7 +176,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Dev"
@@ -183,7 +190,7 @@
         "icon": "http://localhost:22080/resources/icons/fdc3.png",
         "hidden": false,
         "details": {
-            "url": "http://84.238.183.242:3001/fdc3_explained.html",
+            "url": "http://84.238.169.194:3001/fdc3_explained.html",
             "height": 640,
             "width": 560,
             "left": 100,
@@ -193,7 +200,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Dev"
@@ -206,7 +214,7 @@
         "icon": "http://localhost:22080/resources/icons/fdc3.png",
         "hidden": false,
         "details": {
-            "url": "http://84.238.183.242:3001/fdc3_receive.html",
+            "url": "http://84.238.169.194:3001/fdc3_receive.html",
             "height": 640,
             "width": 560,
             "left": 100,
@@ -216,7 +224,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Dev"
@@ -229,7 +238,7 @@
         "icon": "http://localhost:22080/resources/icons/fdc3.png",
         "hidden": false,
         "details": {
-            "url": "http://84.238.183.242:3001/glue42-core-demo.html",
+            "url": "http://84.238.169.194:3001/glue42-core-demo.html",
             "height": 640,
             "width": 560,
             "left": 100,
@@ -239,7 +248,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Dev"
@@ -262,7 +272,8 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Orig"
@@ -285,10 +296,35 @@
             "loader": {
                 "enabled": true,
                 "hideOnLoad": true
-            }
+            },
+            "fdc3InitsGlue": true
         },
         "customProperties": {
             "folder": "FDC3 Orig"
+        }
+    },
+    {
+        "title": "FactSet Workstation",
+        "type": "window",
+        "name": "factset-workstation",
+        "icon": "http://localhost:22080/resources/icons/factset.png",
+        "hidden": false,
+        "details": {
+            "url": "https://my.factset.com",
+            "height": 640,
+            "width": 560,
+            "left": 100,
+            "top": 100,
+            "mode": "tab",
+            "allowChannels": true,
+            "loader": {
+                "enabled": true,
+                "hideOnLoad": true
+            },
+            "fdc3InitsGlue": true
+        },
+        "customProperties": {
+            "folder": "FactSet"
         }
     }
 ]
