@@ -121,7 +121,7 @@
                 "enabled": true,
                 "hideOnLoad": true
             },
-            "fdc3InitsGlue": true
+            "fdc3InitsGlue": false
         },
         "customProperties": {
             "folder": "FDC3 Prod"
@@ -249,7 +249,7 @@
                 "enabled": true,
                 "hideOnLoad": true
             },
-            "fdc3InitsGlue": true
+            "fdc3InitsGlue": false
         },
         "customProperties": {
             "folder": "FDC3 Dev"
