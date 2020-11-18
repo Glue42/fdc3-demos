@@ -82,7 +82,7 @@
         }
     }
 
-    var version = "1.6.1";
+    var version = "1.6.6";
 
     function createCommonjsModule(fn, basedir, module) {
     	return module = {
@@ -743,39 +743,46 @@
                             return [4, this.interop.register(Control.CONTROL_METHOD, function (arg) { return __awaiter(_this, void 0, void 0, function () {
                                     var command, result, result, callback;
                                     return __generator(this, function (_a) {
-                                        command = arg;
-                                        logger.trace("received control command " + JSON.stringify(command));
-                                        if (command.domain === "windows") {
-                                            if (!this.myWindow) {
+                                        switch (_a.label) {
+                                            case 0:
+                                                command = arg;
+                                                logger.trace("received control command " + JSON.stringify(command));
+                                                if (!(command.domain === "windows")) return [3, 2];
+                                                if (!this.myWindow) {
+                                                    return [2];
+                                                }
+                                                return [4, this.myWindow[command.command].call(this.myWindow, command.args)];
+                                            case 1:
+                                                result = _a.sent();
+                                                if (command.skipResult) {
+                                                    return [2, {}];
+                                                }
+                                                else {
+                                                    return [2, result];
+                                                }
+                                            case 2:
+                                                if (!(command.domain === "appManager")) return [3, 4];
+                                                if (!this.myInstance) {
+                                                    return [2];
+                                                }
+                                                return [4, this.myInstance[command.command].call(this.myInstance, command.args)];
+                                            case 3:
+                                                result = _a.sent();
+                                                if (command.skipResult) {
+                                                    return [2, {}];
+                                                }
+                                                else {
+                                                    return [2, result];
+                                                }
+                                            case 4:
+                                                if (command.domain === "layouts") {
+                                                    callback = this.callbacks[command.domain];
+                                                    if (callback) {
+                                                        callback(command);
+                                                    }
+                                                }
                                                 return [2];
-                                            }
-                                            result = this.myWindow[command.command].call(this.myWindow, command.args);
-                                            if (command.skipResult) {
-                                                return [2, {}];
-                                            }
-                                            else {
-                                                return [2, result];
-                                            }
                                         }
-                                        if (command.domain === "appManager") {
-                                            if (!this.myInstance) {
-                                                return [2];
-                                            }
-                                            result = this.myInstance[command.command].call(this.myInstance, command.args);
-                                            if (command.skipResult) {
-                                                return [2, {}];
-                                            }
-                                            else {
-                                                return [2, result];
-                                            }
-                                        }
-                                        if (command.domain === "layouts") {
-                                            callback = this.callbacks[command.domain];
-                                            if (callback) {
-                                                callback(command);
-                                            }
-                                        }
-                                        return [2];
                                     });
                                 }); })];
                         case 1:
@@ -967,19 +974,28 @@
         return ChildWebWindow;
     }(RemoteWebWindow));
 
-    var createMethodName = function (id) { return "\"GC.Wnd.\"" + id; };
-    var registerChildStartupContext = function (interop, parent, id, name, options) {
+    var createMethodName = function (id) { return "GC.Wnd." + id; };
+    var registerChildStartupContext = function (interop, parent, id, name, options) { return __awaiter(void 0, void 0, void 0, function () {
+        var methodName, startingContext;
         var _a;
-        var methodName = createMethodName(id);
-        var startingContext = {
-            context: (_a = options === null || options === void 0 ? void 0 : options.context) !== null && _a !== void 0 ? _a : {},
-            name: name,
-            parent: parent
-        };
-        interop.register(methodName, function () { return startingContext; });
-    };
+        return __generator(this, function (_b) {
+            switch (_b.label) {
+                case 0:
+                    methodName = createMethodName(id);
+                    startingContext = {
+                        context: (_a = options === null || options === void 0 ? void 0 : options.context) !== null && _a !== void 0 ? _a : {},
+                        name: name,
+                        parent: parent
+                    };
+                    return [4, interop.register(methodName, function () { return startingContext; })];
+                case 1:
+                    _b.sent();
+                    return [2];
+            }
+        });
+    }); };
     var initStartupContext = function (my, interop, instance) { return __awaiter(void 0, void 0, void 0, function () {
-        var methodName, result;
+        var methodName, result, context_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -989,12 +1005,13 @@
                 case 1:
                     result = _a.sent();
                     if (my) {
-                        my.setContext(result.returned.context);
+                        context_1 = result.returned.context;
+                        my.setContext(context_1);
                         my.name = result.returned.name;
                         my.parent = result.returned.parent;
                         if (instance) {
                             instance.startedByScript = true;
-                            instance.context = result.returned.context;
+                            instance.context = context_1;
                         }
                     }
                     _a.label = 2;
@@ -1047,13 +1064,15 @@
                             left = (_c = options === null || options === void 0 ? void 0 : options.left) !== null && _c !== void 0 ? _c : window.screen.availWidth - window.screenLeft;
                             top = (_d = options === null || options === void 0 ? void 0 : options.top) !== null && _d !== void 0 ? _d : 0;
                             id = shortid();
-                            registerChildStartupContext(this.interop, this.my().id, id, name, options);
-                            if (!(options === null || options === void 0 ? void 0 : options.relativeTo)) return [3, 2];
+                            return [4, registerChildStartupContext(this.interop, this.my().id, id, name, options)];
+                        case 1:
+                            _f.sent();
+                            if (!(options === null || options === void 0 ? void 0 : options.relativeTo)) return [3, 3];
                             relativeWindowId_1 = options.relativeTo;
                             relativeWindow = this.list().find(function (w) { return w.id === relativeWindowId_1; });
-                            if (!relativeWindow) return [3, 2];
+                            if (!relativeWindow) return [3, 3];
                             return [4, relativeWindow.getBounds()];
-                        case 1:
+                        case 2:
                             relativeWindowBounds = _f.sent();
                             relativeDir = (_e = options.relativeDirection) !== null && _e !== void 0 ? _e : "right";
                             newBounds = this.getRelativeBounds({ width: width, height: height, left: left, top: top }, relativeWindowBounds, relativeDir);
@@ -1061,8 +1080,8 @@
                             height = newBounds.height;
                             left = newBounds.left;
                             top = newBounds.top;
-                            _f.label = 2;
-                        case 2:
+                            _f.label = 3;
+                        case 3:
                             optionsString = "width=" + width + ",height=" + height + ",left=" + left + ",top=" + top + ",scrollbars=none,location=no,status=no,menubar=no";
                             newWindow = window.open(url, id, optionsString);
                             if (!newWindow) {
@@ -1126,8 +1145,9 @@
                         width: rect.width,
                         height: relativeTo.height
                     };
+                default:
+                    throw new Error("invalid relativeDirection");
             }
-            throw new Error("invalid relativeDirection");
         };
         Windows.prototype.trackWindowsLifetime = function () {
             var _this = this;
@@ -2437,6 +2457,12 @@
             this._windows = _windows;
             this._registry = lib$1();
             this.start = function (context, options) {
+                if (typeof context !== "undefined" && typeof context !== "object") {
+                    throw new Error("Please provide the context as an object!");
+                }
+                if (typeof options !== "undefined" && typeof options !== "object") {
+                    throw new Error("Please provide the options as an object!");
+                }
                 return promisePlus(function () { return _this.startWithoutTimeout(context, options); }, 3000, "Application \"" + _this.name + "\" start timeout!");
             };
             if (typeof ((_a = _props === null || _props === void 0 ? void 0 : _props.userProperties) === null || _a === void 0 ? void 0 : _a.manifest) === "undefined") {
@@ -2573,35 +2599,38 @@
     }());
 
     var RemoteInstance = (function () {
-        function RemoteInstance(id, application, control, context, agm) {
+        function RemoteInstance(id, application, control, agm, appManager, window) {
+            var _this = this;
             this.id = id;
             this.application = application;
             this.control = control;
-            this.context = context;
             this.agm = agm;
+            this.appManager = appManager;
+            this.window = window;
             this.WINDOW_DID_NOT_HAVE_TIME_TO_RESPOND = "Peer has left while waiting for result";
+            var unsub = control.onStart(function () {
+                var _a;
+                (_a = _this.window) === null || _a === void 0 ? void 0 : _a.getContext().then(function (context) {
+                    unsub();
+                    _this.context = context;
+                });
+            });
         }
         RemoteInstance.prototype.stop = function () {
-            return __awaiter(this, void 0, void 0, function () {
-                var error_1;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            _a.trys.push([0, 2, , 3]);
-                            return [4, this.callControl("stop", {}, false)];
-                        case 1:
-                            _a.sent();
-                            return [3, 3];
-                        case 2:
-                            error_1 = _a.sent();
-                            if (error_1.message !== this.WINDOW_DID_NOT_HAVE_TIME_TO_RESPOND) {
-                                throw new Error(error_1);
-                            }
-                            return [3, 3];
-                        case 3: return [2];
+            var _this = this;
+            var instanceStoppedPromise = new Promise(function (resolve, reject) {
+                _this.appManager.onInstanceStopped(function (instance) {
+                    if (instance.id === _this.id) {
+                        resolve();
+                    }
+                });
+                _this.callControl("stop", {}, false).catch(function (error) {
+                    if (error.message !== _this.WINDOW_DID_NOT_HAVE_TIME_TO_RESPOND) {
+                        reject(error);
                     }
                 });
             });
+            return promisePlus(function () { return instanceStoppedPromise; }, 10000, "Instance " + this.id + " stop timeout!");
         };
         RemoteInstance.prototype.callControl = function (command, args, skipResult) {
             if (skipResult === void 0) { skipResult = false; }
@@ -2611,26 +2640,20 @@
     }());
 
     var LocalInstance = (function () {
-        function LocalInstance(id, control, _appManager, agm) {
+        function LocalInstance(id, control, agm) {
             this.id = id;
             this.control = control;
-            this._appManager = _appManager;
             this.agm = agm;
             this.context = {};
             this.startedByScript = false;
             this.application = undefined;
-            control.setLocalInstance(this);
+            this.control.setLocalInstance(this);
         }
         LocalInstance.prototype.stop = function () {
             var _this = this;
             return new Promise(function (resolve, reject) {
                 if (_this.startedByScript) {
-                    var unsubscribe_1 = _this._appManager.onInstanceStopped(function (instance) {
-                        if (instance.id === _this.id) {
-                            unsubscribe_1();
-                            resolve();
-                        }
-                    });
+                    resolve();
                     window.close();
                 }
                 else {
@@ -2708,17 +2731,14 @@
             this.OKAY_MESSAGE = "OK";
             this.LOCAL_SOURCE = "LOCAL_SOURCE";
             var myId = interop.instance.instance;
-            this._myInstance = new LocalInstance(myId, this.control, this, this.interop.instance);
+            this._myInstance = new LocalInstance(myId, this.control, this.interop.instance);
             if ((_a = this.config) === null || _a === void 0 ? void 0 : _a.remoteSources) {
-                this.readyPromise = this.subscribeForRemoteApplications(this.config.remoteSources);
+                this.readyPromise = this.subscribeForRemoteApplications(this.config.remoteSources).then(function () { return _this.trackInstanceLifetime(); });
             }
             if ((_b = this.config) === null || _b === void 0 ? void 0 : _b.localApplications) {
                 var validatedApplications = this.getValidatedApplications(this.config.localApplications);
                 this.addApplications(validatedApplications);
             }
-            control.onStart(function () {
-                _this.trackInstanceLifetime();
-            });
         }
         Object.defineProperty(AppManager.prototype, "myInstance", {
             get: function () {
@@ -2968,65 +2988,42 @@
             }
         };
         AppManager.prototype.remoteFromServer = function (server) {
-            return __awaiter(this, void 0, void 0, function () {
-                var serverApp, id, app, appWindow, context;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            serverApp = server.application;
-                            if (!server.instance || !serverApp || !this._apps[serverApp]) {
-                                return [2, undefined];
-                            }
-                            id = server.instance;
-                            app = this._apps[serverApp].application;
-                            appWindow = this.windows.list().find(function (window) { return window.id === server.windowId; });
-                            return [4, (appWindow === null || appWindow === void 0 ? void 0 : appWindow.getContext())];
-                        case 1:
-                            context = _a.sent();
-                            return [2, new RemoteInstance(id, app, this.control, context, server)];
-                    }
-                });
-            });
+            var serverApp = server.application;
+            if (!server.instance || !serverApp || !this._apps[serverApp]) {
+                return undefined;
+            }
+            var id = server.instance;
+            var app = this._apps[serverApp].application;
+            var appWindow = this.windows.list().find(function (window) { return window.id === server.windowId; });
+            return new RemoteInstance(id, app, this.control, server, this, appWindow);
         };
         AppManager.prototype.trackInstanceLifetime = function () {
             var _this = this;
             this.interop.serverMethodAdded(function (_a) {
                 var server = _a.server, method = _a.method;
-                return __awaiter(_this, void 0, void 0, function () {
-                    var remoteInstance;
-                    return __generator(this, function (_b) {
-                        switch (_b.label) {
-                            case 0:
-                                if (method.name !== Control.CONTROL_METHOD) {
-                                    return [2];
-                                }
-                                return [4, this.remoteFromServer(server)];
-                            case 1:
-                                remoteInstance = _b.sent();
-                                if (remoteInstance) {
-                                    this._instances.push(remoteInstance);
-                                    this.registry.execute("instanceStarted", remoteInstance);
-                                }
-                                return [2];
-                        }
-                    });
-                });
-            });
-            this.interop.serverRemoved(function (server) { return __awaiter(_this, void 0, void 0, function () {
-                var remoteInstance;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0: return [4, this.remoteFromServer(server)];
-                        case 1:
-                            remoteInstance = _a.sent();
-                            if (remoteInstance) {
-                                this._instances = this._instances.filter(function (instance) { return instance.id !== remoteInstance.id; });
-                                this.registry.execute("instanceStopped", remoteInstance);
-                            }
-                            return [2];
+                if (method.name !== Control.CONTROL_METHOD) {
+                    return;
+                }
+                var remoteInstance = _this.remoteFromServer(server);
+                if (remoteInstance) {
+                    if (_this._instances.some(function (instance) { return instance.id === remoteInstance.id; })) {
+                        return;
                     }
-                });
-            }); });
+                    _this._instances.push(remoteInstance);
+                    _this.registry.execute("instanceStarted", remoteInstance);
+                }
+            });
+            this.interop.serverRemoved(function (server) {
+                var serverId = server.instance;
+                if (!serverId) {
+                    return;
+                }
+                var remoteInstance = _this._instances.find(function (instance) { return instance.id === serverId; });
+                if (remoteInstance) {
+                    _this._instances = _this._instances.filter(function (instance) { return instance.id !== remoteInstance.id; });
+                    _this.registry.execute("instanceStopped", remoteInstance);
+                }
+            });
         };
         return AppManager;
     }());
@@ -3046,10 +3043,10 @@
         type: optional(nonEmptyStringDecoder$2),
         data: optional(object())
     });
-    var glue42CoreIntentFilterDecoder = oneOf(object({
+    var glue42CoreIntentFilterDecoder = optional(oneOf(object({
         name: optional(string()),
         contextType: optional(string())
-    }), nonEmptyStringDecoder$2);
+    }), nonEmptyStringDecoder$2));
     var glue42CoreIntentDefinitionDecoder = oneOf(object({
         intent: nonEmptyStringDecoder$2,
         contextTypes: optional(array(string())),
@@ -3546,17 +3543,30 @@
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0: return [4, Promise.all(layouts.map(function (layout) { return __awaiter(_this, void 0, void 0, function () {
-                                var layoutEvent;
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
+                                var layoutEvent, _a, eventPromise, unsubscribe, error_1;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
                                         case 0: return [4, this.get(layout.name, layout.type)];
                                         case 1:
-                                            layoutEvent = (_a.sent()) ? "layoutChanged" : "layoutAdded";
+                                            layoutEvent = (_b.sent()) ? "layoutChanged" : "layoutAdded";
                                             return [4, this.storage.store(layout, layout.type)];
                                         case 2:
-                                            _a.sent();
+                                            _b.sent();
+                                            _a = this.waitHearLayout(layout.name, layoutEvent), eventPromise = _a.eventPromise, unsubscribe = _a.unsubscribe;
                                             this.emitLayoutEvent(layoutEvent, layout);
-                                            return [2];
+                                            _b.label = 3;
+                                        case 3:
+                                            _b.trys.push([3, 5, , 6]);
+                                            return [4, eventPromise];
+                                        case 4:
+                                            _b.sent();
+                                            unsubscribe();
+                                            return [3, 6];
+                                        case 5:
+                                            error_1 = _b.sent();
+                                            unsubscribe();
+                                            return [2, Promise.reject(error_1)];
+                                        case 6: return [2];
                                     }
                                 });
                             }); }))];
@@ -3734,6 +3744,23 @@
         };
         LayoutsController.prototype.onLayoutRemoved = function (callback) {
             return this._registry.add("layoutRemoved", callback);
+        };
+        LayoutsController.prototype.waitHearLayout = function (name, layoutEvent) {
+            var _this = this;
+            var unsubscribe;
+            var eventPromise = promisePlus(function () {
+                return new Promise(function (resolve) {
+                    var cb = function (layout) {
+                        if (layout.name === name) {
+                            resolve();
+                        }
+                    };
+                    unsubscribe = layoutEvent === "layoutAdded" ?
+                        _this.onLayoutAdded(cb) :
+                        _this.onLayoutChanged(cb);
+                });
+            }, 5000, "Timed out waiting to hear " + layoutEvent + " for layout name: " + name);
+            return { eventPromise: eventPromise, unsubscribe: unsubscribe };
         };
         LayoutsController.prototype.restoreComponents = function (layout) {
             var _this = this;
@@ -4550,7 +4577,6 @@
                         _r.sent();
                         _r.label = 4;
                     case 4:
-                        control.start(core.interop, core.logger.subLogger("control"));
                         if (!isWebEnvironment) return [3, 9];
                         return [4, initStartupContext(core.windows.my(), core.interop, (_m = core.appManager) === null || _m === void 0 ? void 0 : _m.myInstance)];
                     case 5:
@@ -4564,7 +4590,9 @@
                     case 8:
                         _r.sent();
                         _r.label = 9;
-                    case 9: return [2, core];
+                    case 9:
+                        control.start(core.interop, core.logger.subLogger("control"));
+                        return [2, core];
                 }
             });
         }); };
@@ -5011,7 +5039,7 @@
                             timestamp: Date.now(),
                         }],
                 };
-                return session.send(publishMetricsMsg);
+                return session.sendFireAndForget(publishMetricsMsg);
             }
             return Promise.resolve();
         };
@@ -5517,7 +5545,12 @@
                     }
                     return acc;
                 }, []);
-                callbacks[key] = allForKey;
+                if (allForKey.length === 0) {
+                    delete callbacks[key];
+                }
+                else {
+                    callbacks[key] = allForKey;
+                }
             };
         }
         function execute(key) {
@@ -5796,9 +5829,7 @@
         return timerObj;
     }
 
-    var dummyRequire = function () { return undefined; };
-    var requireFunc = Utils.isNode() ? require : dummyRequire;
-    var WebSocketConstructor = Utils.isNode() ? requireFunc("ws") : window.WebSocket;
+    var WebSocketConstructor = Utils.isNode() ? require("ws") : window.WebSocket;
     var WS = (function () {
         function WS(settings, logger) {
             this.startupTimer = timer("connection");
@@ -6443,7 +6474,7 @@
             msg.request_id = msg.request_id ? msg.request_id : getNextRequestId();
             msg.domain = msg.domain || domain;
             msg.peer_id = connection.peerId;
-            connection.send(msg);
+            return connection.send(msg);
         }
         return {
             join: join,
@@ -6758,7 +6789,7 @@
                 }
                 this.connection.login(this.loginConfig, true)
                     .catch(function () {
-                    setTimeout(_this.handleDisconnected, 1000);
+                    setTimeout(_this.handleDisconnected.bind(_this), _this.settings.reconnectInterval || 1000);
                 });
             }
         };
@@ -7239,10 +7270,10 @@
         }
     };
 
-    var version$2 = "5.2.4";
+    var version$2 = "5.2.7";
 
     function prepareConfig (configuration, ext, glue42gd) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         var nodeStartingContext;
         if (Utils.isNode()) {
             var startingContextString = process.env._GD_STARTING_CONTEXT_;
@@ -7250,7 +7281,7 @@
                 try {
                     nodeStartingContext = JSON.parse(startingContextString);
                 }
-                catch (_e) {
+                catch (_f) {
                 }
             }
         }
@@ -7383,15 +7414,25 @@
             };
         }
         var connection = getConnection();
+        var application = getApplication();
+        if (typeof window !== "undefined") {
+            var windowAsAny = window;
+            var containerApplication = windowAsAny.htmlContainer ?
+                windowAsAny.htmlContainer.containerName + "." + windowAsAny.htmlContainer.application : (_a = windowAsAny === null || windowAsAny === void 0 ? void 0 : windowAsAny.glue42gd) === null || _a === void 0 ? void 0 : _a.application;
+            if (containerApplication) {
+                application = containerApplication;
+            }
+        }
         return {
-            bus: (_a = configuration.bus) !== null && _a !== void 0 ? _a : false,
+            bus: (_b = configuration.bus) !== null && _b !== void 0 ? _b : false,
+            application: application,
             auth: getAuth(),
             logger: getLogger(),
             connection: connection,
-            metrics: (_b = configuration.metrics) !== null && _b !== void 0 ? _b : true,
-            contexts: (_c = configuration.contexts) !== null && _c !== void 0 ? _c : true,
+            metrics: (_c = configuration.metrics) !== null && _c !== void 0 ? _c : true,
+            contexts: (_d = configuration.contexts) !== null && _d !== void 0 ? _d : true,
             version: ext.version || version$2,
-            libs: (_d = ext.libs) !== null && _d !== void 0 ? _d : [],
+            libs: (_e = ext.libs) !== null && _e !== void 0 ? _e : [],
             customLogger: configuration.customLogger
         };
     }
