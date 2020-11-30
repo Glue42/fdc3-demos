@@ -82,7 +82,7 @@
         }
     }
 
-    var version = "1.6.6";
+    var version = "1.6.7";
 
     function createCommonjsModule(fn, basedir, module) {
     	return module = {
@@ -2848,10 +2848,12 @@
                             _loop_1 = function (remoteSource) {
                                 var url = remoteSource.url;
                                 var appsFetch = function () { return __awaiter(_this, void 0, void 0, function () {
-                                    var response, json, validatedApplications;
+                                    var response, json, validatedApplications, error_2;
                                     return __generator(this, function (_a) {
                                         switch (_a.label) {
-                                            case 0: return [4, fetchTimeout(url, remoteSource.requestTimeout || this.DEFAULT_REQUEST_TIMEOUT)];
+                                            case 0:
+                                                _a.trys.push([0, 3, , 4]);
+                                                return [4, fetchTimeout(url, remoteSource.requestTimeout || this.DEFAULT_REQUEST_TIMEOUT)];
                                             case 1:
                                                 response = _a.sent();
                                                 return [4, response.json()];
@@ -2861,12 +2863,17 @@
                                                     validatedApplications = this.getValidatedApplications(json.applications);
                                                     this.addApplications(validatedApplications, url);
                                                 }
-                                                return [2];
+                                                return [3, 4];
+                                            case 3:
+                                                error_2 = _a.sent();
+                                                console.warn("Failed to fetch apps from " + url);
+                                                return [3, 4];
+                                            case 4: return [2];
                                         }
                                     });
                                 }); };
                                 initialFetchAppsPromises.push(appsFetch());
-                                setInterval(function () { return appsFetch().catch(console.warn); }, remoteSource.pollingInterval || this_1.DEFAULT_POLLING_INTERVAL);
+                                setInterval(function () { return appsFetch(); }, remoteSource.pollingInterval || this_1.DEFAULT_POLLING_INTERVAL);
                             };
                             this_1 = this;
                             for (_i = 0, remoteSources_1 = remoteSources; _i < remoteSources_1.length; _i++) {
