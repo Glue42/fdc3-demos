@@ -175,14 +175,10 @@ window.createChannelSelectorWidget = (
     location.href.split("/")[3].startsWith("fdc3_") ? "light" : "dark"
   );
 
-  const intervalId = setInterval(() => {
-    if (typeof window.glue !== "undefined") {
-      clearInterval(intervalId);
-
-      // Whenever a channel is joined or left rerender the channels.
-      window.glue.channels.onChanged((channelName) => {
-        rerenderChannels(channelName || NO_CHANNEL_VALUE, channelNamesAndColors, onChannelSelected);
-      });
-    }
-  }, 1000);
+  window.fdc3GluePromise.then((glue) => {
+    // Whenever a channel is joined or left rerender the channels.
+    glue.channels.onChanged((channelName) => {
+      rerenderChannels(channelName || NO_CHANNEL_VALUE, channelNamesAndColors, onChannelSelected);
+    });
+  });
 })();

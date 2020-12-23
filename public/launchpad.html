@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glue42 Core Demo</title>
+  <script>
+    const localApplications = [
+      {
+        name: "FDC3 TradingView Chart (orig)",
+        appId: "fdc3-tradingview-chart-orig",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://appd.kolbito.com/demos/tradingview-chart/index.html\"}",
+        intents: [
+          {
+            name: "fdc3.ViewChart",
+            contexts: [
+              "fdc3.instrument"
+            ]
+          }
+        ]
+      },
+      {
+        name: "FDC3 TradingView Blotter (orig)",
+        appId: "fdc3-tradingview-blotter-orig",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://appd.kolbito.com/demos/tradingview-blotter/index.html\"}"
+      },
+      {
+        name: "FDC3 Explained (orig)",
+        appId: "fdc3-explained-orig",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://appd.kolbito.com/demos/fdc3_explained.html\"}"
+      },
+      {
+        name: "FDC3 Channel Manager (orig)",
+        appId: "fdc3-channel-manager-orig",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://appd.kolbito.com/demos/channel-manager/index.html\"}"
+      },
+      {
+        name: "FDC3 TradingView Chart (prod)",
+        appId: "fdc3-tradingview-chart-prod",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://fdc3-demo.glue42.com/tradingview-chart.html\"}",
+        intents: [
+          {
+            name: "fdc3.ViewChart",
+            contexts: [
+              "fdc3.instrument"
+            ]
+          }
+        ]
+      },
+      {
+        name: "FDC3 TradingView Blotter (prod)",
+        appId: "fdc3-tradingview-blotter-prod",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://fdc3-demo.glue42.com/tradingview-blotter.html\"}"
+      },
+      {
+        name: "FDC3 Explained (prod)",
+        appId: "fdc3-explained-prod",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://fdc3-demo.glue42.com/fdc3_explained.html\"}"
+      },
+      {
+        name: "FDC3 Receive (prod)",
+        appId: "fdc3-receive-prod",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://fdc3-demo.glue42.com/fdc3_receive.html\"}"
+      },
+      {
+        name: "FDC3 Glue42 Core Demo (prod)",
+        appId: "fdc3-glue42-core-demo-prod",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://fdc3-demo.glue42.com/glue42-core-demo.html\"}"
+      },
+      {
+        name: "FDC3 TradingView Chart (dev)",
+        appId: "fdc3-tradingview-chart-dev",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"http://localhost:3001/tradingview-chart.html\"}",
+        intents: [
+          {
+            name: "fdc3.ViewChart",
+            contexts: [
+              "fdc3.instrument"
+            ]
+          }
+        ]
+      },
+      {
+        name: "FDC3 TradingView Blotter (dev)",
+        appId: "fdc3-tradingview-blotter-dev",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"http://localhost:3001/tradingview-blotter.html\"}"
+      },
+      {
+        name: "FDC3 Explained (dev)",
+        appId: "fdc3-explained-dev",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"http://localhost:3001/fdc3_explained.html\"}"
+      },
+      {
+        name: "FDC3 Receive (dev)",
+        appId: "fdc3-receive-dev",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"http://localhost:3001/fdc3_receive.html\"}"
+      },
+      {
+        name: "FDC3 Glue42 Core Demo (dev)",
+        appId: "fdc3-glue42-core-demo-dev",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"http://localhost:3001/glue42-core-demo.html\"}"
+      },
+      {
+        name: "FactSet Workstation",
+        appId: "factset-workstation",
+        manifestType: "fdc3.glue42-core.demo",
+        manifest: "{\"url\":\"https://my.apps.factset.com/navigator/company-security/snapshot/AAPL-US\"}"
+      }
+    ];
+    const channelsConfig = {
+      definitions: [
+        {
+          "name": "Red",
+          "meta": {
+            "color": "red",
+            "name": "Red"
+          }
+        },
+        {
+          "name": "Green",
+          "meta": {
+            "color": "green",
+            "name": "Green"
+          }
+        },
+        {
+          "name": "Blue",
+          "meta": {
+            "color": "#66ABFF",
+            "name": "Blue"
+          }
+        },
+        {
+          "name": "Pink",
+          "meta": {
+            "color": "#F328BB",
+            "name": "Pink"
+          }
+        },
+        {
+          "name": "Yellow",
+          "meta": {
+            "color": "#FFE733",
+            "name": "Yellow"
+          }
+        },
+        {
+          "name": "Dark Yellow",
+          "meta": {
+            "color": "#b09b00",
+            "name": "Dark Yellow"
+          }
+        },
+        {
+          "name": "Orange",
+          "meta": {
+            "color": "#fa5a28",
+            "name": "Orange"
+          }
+        },
+        {
+          "name": "Purple",
+          "meta": {
+            "color": "#c873ff",
+            "name": "Purple"
+          }
+        },
+        {
+          "name": "Lime",
+          "meta": {
+            "color": "#8af59e",
+            "name": "Lime"
+          }
+        },
+        {
+          "name": "Cyan",
+          "meta": {
+            "color": "#80f3ff",
+            "name": "Cyan"
+          }
+        }
+      ]
+    };
+
+    window.webPlatformConfig = {
+      applications: {
+        local: localApplications
+      },
+      channels: channelsConfig
+    };
+  </script>
+  <script type="text/javascript" src="./scripts/fdc3-glue42.js"></script>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script>
+    const populateApps = () => {
+      const containerElement = document.getElementById('container');
+      containerElement.innerHTML = '';
+
+      containerElement.textContent = 'Applications';
+      containerElement.style.width = '200px';
+      containerElement.style.display = 'flex';
+      containerElement.style.flexDirection = 'column';
+      containerElement.style.textAlign = 'center';
+      containerElement.style.fontSize = '36px';
+
+      const appNames = window.webPlatformConfig.applications.local.map((application) => application.name);
+
+      for (const appName of appNames) {
+        const appElement = document.createElement('button');
+        appElement.textContent = appName;
+        appElement.addEventListener('click', () => {
+          fdc3.open(appName);
+        });
+        appElement.style.marginTop = '8px';
+
+        containerElement.append(appElement);
+      }
+
+      document.body.append(containerElement);
+    };
+
+    function fdc3Init(callback) {
+      let fdc3Tries = 10; //lets not check forever...
+      const onFDC3Ready = () => {
+        if (window.fdc3) {
+          callback.call(this);
+        }
+        else {
+          if (fdc3Tries > 0) {
+            fdc3Tries--;
+            window.setTimeout(onFDC3Ready, 100);
+          }
+        }
+      };
+      onFDC3Ready();
+    }
+
+    fdc3Init(() => {
+      if (typeof window.fdc3GluePromise !== 'undefined') {
+        window.fdc3GluePromise.then((glue) => {
+          populateApps();
+
+          glue.appManager.onAppAdded(() => populateApps());
+          glue.appManager.onAppChanged(() => populateApps());
+          glue.appManager.onAppRemoved(() => populateApps());
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

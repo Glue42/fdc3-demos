@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+  "name": "@glue42/fdc3 injector",
+  "description": "An extension that auto-injects @glue42/fdc3 inside of all web pages.",
+  "version": "1.0",
+  "permissions": [],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    "fdc3-glue42.js"
+  ]
+}

@@ -24,3 +24,12 @@ If you do not run the demo inside of a container that has a channel selector wid
 3. `node index.js`
 4. Navigate to `http://localhost:3001/`. You should see the blotter and chart applications side by side
 5. Navigate to `http://localhost:3001/fdc3_explained.html` and `http://localhost:3001/fdc3_receive.html`
+
+## Installing the **@glue42/fdc3 injector** extension
+
+The extension is not published with Chrome. To use it, you will need to  install it locally.
+
+1. Navigate to `chrome://extensions`
+2. Click the **Load unpacked** button in the top left of the screen (if this option is not available, select **Developer mode** using the toggle switch in the top right)
+3. Select the extension directory from your local fdc3-demos setup
+4. To try out changes, just refresh the extension from the `chrome://extensions` page
