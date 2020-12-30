@@ -14,26 +14,28 @@
     ((async () => {
       window.glue = await GlueWeb();
 
-      // glue.intents.raise({
-      //   intent: 'fdc3.ViewChart',
-      //   context: {
-      //     data: { id: { ticker: 'LMND' } },
-      //     type: 'fdc3.instrument'
-      //   },
-      //   target: 'reuse'
-      // });
+      /*
+        glue.intents.raise({
+          intent: 'fdc3.ViewChart',
+          context: {
+            data: { id: { ticker: 'LMND' } },
+            type: 'fdc3.instrument'
+          },
+          target: 'reuse'
+        });
 
-      // glue.intents.addIntentListener(
-      //   {
-      //     intent: 'newlyAddedGlue42CoreIntent',
-      //     contextTypes: ['fdc3.instrument']
-      //   },
-      //   ({ data: { id: { ticker } } }) => {
-      //     const newDiv = document.createElement('h4');
-      //     newDiv.innerText = ticker;
-      //     document.body.appendChild(newDiv);
-      //   }
-      // );
+        glue.intents.addIntentListener(
+          {
+            intent: 'newlyAddedGlue42CoreIntent',
+            contextTypes: ['fdc3.instrument']
+          },
+          ({ data: { id: { ticker } } }) => {
+            const newDiv = document.createElement('h4');
+            newDiv.innerText = ticker;
+            document.body.appendChild(newDiv);
+          }
+        );
+      */
     })());
   </script>
 </body>

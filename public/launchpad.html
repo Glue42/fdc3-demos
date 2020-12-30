@@ -221,7 +221,7 @@
       containerElement.style.textAlign = 'center';
       containerElement.style.fontSize = '36px';
 
-      const appNames = window.webPlatformConfig.applications.local.map((application) => application.name);
+      const appNames = window.glue.appManager.applications().map((application) => application.name);
 
       for (const appName of appNames) {
         const appElement = document.createElement('button');
